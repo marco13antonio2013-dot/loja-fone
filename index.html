@@ -1,0 +1,265 @@
+# loja-fone
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SoundTech - Fones Bluetooth</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    header {
+      background: #111;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 28px;
+    }
+
+    header p {
+      margin-top: 5px;
+      color: #bbb;
+    }
+
+    .banner {
+      background: linear-gradient(135deg, #111, #333);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .banner h2 {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .banner p {
+      color: #ddd;
+    }
+
+    .produtos {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 15px;
+
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .produto {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .produto img {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      margin-bottom: 15px;
+    }
+
+    .produto h3 {
+      margin-bottom: 8px;
+    }
+
+    .descricao {
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .preco {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: #111;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #333;
+    }
+
+    footer {
+      margin-top: 40px;
+      padding: 25px;
+      text-align: center;
+      background: #111;
+      color: #aaa;
+    }
+
+    .mensagem {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .caixa {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 350px;
+      width: 100%;
+    }
+
+    .caixa h2 {
+      margin-bottom: 10px;
+    }
+
+    .caixa p {
+      margin-bottom: 20px;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>🎧 SoundTech</h1>
+    <p>Fones Bluetooth</p>
+  </header>
+
+  <section class="banner">
+    <h2>Seu som. Seu estilo.</h2>
+    <p>Confira nossos fones Bluetooth.</p>
+  </section>
+
+  <section class="produtos">
+
+    <div class="produto">
+      <img
+        src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e"
+        alt="Fone Bluetooth"
+      >
+
+      <h3>AirBass Pro</h3>
+
+      <p class="descricao">
+        Fone Bluetooth com estojo de carregamento.
+      </p>
+
+      <div class="preco">R$ 89,90</div>
+
+      <button onclick="comprar('AirBass Pro')">
+        Comprar
+      </button>
+    </div>
+
+
+    <div class="produto">
+      <img
+        src="https://images.unsplash.com/photo-1484704849700-f032a568e944"
+        alt="Fone de ouvido"
+      >
+
+      <h3>SoundMax</h3>
+
+      <p class="descricao">
+        Fone confortável para música e jogos.
+      </p>
+
+      <div class="preco">R$ 119,90</div>
+
+      <button onclick="comprar('SoundMax')">
+        Comprar
+      </button>
+    </div>
+
+
+    <div class="produto">
+      <img
+        src="https://images.unsplash.com/photo-1577174881658-0f30ed549adc"
+        alt="Fone Bluetooth"
+      >
+
+      <h3>Beat Mini</h3>
+
+      <p class="descricao">
+        Modelo compacto e fácil de transportar.
+      </p>
+
+      <div class="preco">R$ 69,90</div>
+
+      <button onclick="comprar('Beat Mini')">
+        Comprar
+      </button>
+    </div>
+
+  </section>
+
+
+  <div class="mensagem" id="mensagem">
+
+    <div class="caixa">
+
+      <h2>✅ Compra demonstrativa</h2>
+
+      <p id="textoCompra"></p>
+
+      <button onclick="fechar()">
+        Fechar
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <footer>
+    © 2026 SoundTech — Site de demonstração
+  </footer>
+
+
+  <script>
+
+    function comprar(produto) {
+
+      document.getElementById("textoCompra").innerText =
+        "Você selecionou o produto: " + produto +
+        ". Esta é apenas uma demonstração; nenhuma compra foi realizada.";
+
+      document.getElementById("mensagem").style.display = "flex";
+    }
+
+    function fechar() {
+      document.getElementById("mensagem").style.display = "none";
+    }
+
+  </script>
+
+</body>
+</html>
