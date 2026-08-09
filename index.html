@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>AudioMax - Fones Bluetooth</title>
 
 <style>
@@ -11,7 +10,7 @@
   box-sizing:border-box;
   margin:0;
   padding:0;
-  font-family:Arial,Helvetica,sans-serif;
+  font-family:Arial,sans-serif;
 }
 
 body{
@@ -33,13 +32,12 @@ header{
   padding:18px 20px;
   display:flex;
   align-items:center;
-  gap:25px;
+  gap:20px;
 }
 
 .logo{
   font-size:28px;
   font-weight:bold;
-  color:#fff;
   white-space:nowrap;
 }
 
@@ -54,27 +52,26 @@ header{
 
 .search input{
   width:100%;
-  padding:15px;
+  padding:14px;
   border:0;
   border-radius:8px 0 0 8px;
   font-size:16px;
-  outline:none;
 }
 
 .search button{
   border:0;
   background:#ff5a00;
   color:white;
-  padding:0 22px;
+  padding:0 20px;
   border-radius:0 8px 8px 0;
-  font-size:20px;
+  cursor:pointer;
 }
 
 .cart{
   background:#ff5a00;
   border:0;
   color:white;
-  padding:13px 17px;
+  padding:13px 16px;
   border-radius:8px;
   font-weight:bold;
   cursor:pointer;
@@ -86,8 +83,7 @@ header{
   padding:55px 25px;
   border-radius:18px;
   color:white;
-  background:
-    linear-gradient(120deg,#111,#292929,#ff5a00);
+  background:linear-gradient(120deg,#111,#292929,#ff5a00);
 }
 
 .hero h1{
@@ -96,20 +92,19 @@ header{
 }
 
 .hero p{
-  font-size:20px;
-  max-width:650px;
+  font-size:19px;
   line-height:1.5;
 }
 
 .hero button{
   margin-top:25px;
-  background:#fff;
+  background:white;
   color:#111;
   border:0;
-  padding:15px 24px;
+  padding:14px 22px;
   border-radius:8px;
-  font-size:17px;
   font-weight:bold;
+  cursor:pointer;
 }
 
 .categories{
@@ -122,7 +117,7 @@ header{
 }
 
 .categories button{
-  padding:12px 20px;
+  padding:11px 18px;
   border:1px solid #ddd;
   background:white;
   border-radius:8px;
@@ -147,7 +142,7 @@ header{
 
 .products{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
   gap:20px;
 }
 
@@ -167,7 +162,7 @@ header{
 }
 
 .product-info{
-  padding:18px;
+  padding:17px;
 }
 
 .badge{
@@ -177,12 +172,11 @@ header{
   padding:6px 10px;
   border-radius:6px;
   font-size:13px;
-  margin-bottom:10px;
 }
 
 .product h3{
-  font-size:20px;
-  margin-bottom:8px;
+  font-size:19px;
+  margin:10px 0;
 }
 
 .stars{
@@ -197,7 +191,7 @@ header{
 
 .price{
   color:#18864b;
-  font-size:27px;
+  font-size:25px;
   font-weight:bold;
   margin:6px 0;
 }
@@ -221,7 +215,7 @@ header{
 }
 
 .buy:hover{
-  background:#e64f00;
+  background:#df4d00;
 }
 
 .payment{
@@ -230,10 +224,6 @@ header{
   color:white;
   padding:35px 20px;
   text-align:center;
-}
-
-.payment h2{
-  margin-bottom:15px;
 }
 
 .methods{
@@ -246,7 +236,6 @@ header{
 
 .method{
   background:#222;
-  border:1px solid #444;
   padding:15px 22px;
   border-radius:10px;
 }
@@ -255,7 +244,6 @@ header{
   position:fixed;
   right:20px;
   bottom:20px;
-  z-index:2000;
   width:65px;
   height:65px;
   border-radius:50%;
@@ -265,6 +253,7 @@ header{
   font-size:27px;
   box-shadow:0 5px 20px rgba(0,0,0,.3);
   cursor:pointer;
+  z-index:2000;
 }
 
 .chat{
@@ -277,8 +266,8 @@ header{
   background:white;
   border-radius:15px;
   box-shadow:0 8px 35px rgba(0,0,0,.25);
-  z-index:1999;
   overflow:hidden;
+  z-index:1999;
 }
 
 .chat-header{
@@ -338,11 +327,110 @@ footer{
   padding:30px 20px;
 }
 
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  z-index:3000;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.modal-box{
+  background:white;
+  width:500px;
+  max-width:100%;
+  max-height:90vh;
+  overflow:auto;
+  border-radius:16px;
+  padding:25px;
+}
+
+.modal-box h2{
+  margin-bottom:20px;
+}
+
+.close{
+  float:right;
+  border:0;
+  background:#eee;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  cursor:pointer;
+}
+
+.cart-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:12px 0;
+  border-bottom:1px solid #ddd;
+}
+
+.remove{
+  background:#e53935;
+  color:white;
+  border:0;
+  padding:7px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.total{
+  font-size:22px;
+  font-weight:bold;
+  margin:20px 0;
+}
+
+.checkout{
+  width:100%;
+  padding:15px;
+  background:#ff5a00;
+  color:white;
+  border:0;
+  border-radius:8px;
+  font-size:17px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.payment-options{
+  display:grid;
+  gap:12px;
+}
+
+.payment-option{
+  border:2px solid #ddd;
+  padding:18px;
+  border-radius:10px;
+  background:white;
+  text-align:left;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.payment-option:hover{
+  border-color:#ff5a00;
+  background:#fff7f2;
+}
+
+.note{
+  margin-top:15px;
+  padding:12px;
+  background:#f3f3f3;
+  border-radius:8px;
+  font-size:13px;
+  color:#555;
+}
+
 @media(max-width:700px){
 
   .top{
     flex-wrap:wrap;
-    gap:12px;
   }
 
   .logo{
@@ -404,481 +492,659 @@ footer{
 <body>
 
 <header>
-  <div class="top">
 
-    <div class="logo">
-      Audio<span>Max</span>
-    </div>
+<div class="top">
 
-    <div class="search">
-      <input id="searchInput" type="text" placeholder="Encontre seu fone...">
-      <button onclick="searchProducts()">🔎</button>
-    </div>
+<div class="logo">
+Audio<span>Max</span>
+</div>
 
-    <button class="cart" onclick="showCart()">
-      🛒 Carrinho <span id="cartCount">0</span>
-    </button>
+<div class="search">
+<input id="searchInput" placeholder="Encontre seu fone...">
+<button onclick="searchProducts()">🔎</button>
+</div>
 
-  </div>
+<button class="cart" onclick="openCart()">
+🛒 Carrinho (<span id="cartCount">0</span>)
+</button>
+
+</div>
+
 </header>
 
 <section class="hero">
 
-  <h1>Seu som.<br>Seu momento.</h1>
+<h1>Seu som.<br>Seu momento.</h1>
 
-  <p>
-    Fones Bluetooth e acessórios para música,
-    jogos, estudos e seu dia a dia.
-  </p>
+<p>
+Fones Bluetooth para música, jogos,
+estudos e seu dia a dia.
+</p>
 
-  <button onclick="document.getElementById('produtos').scrollIntoView()">
-    Ver produtos
-  </button>
+<button onclick="document.getElementById('produtos').scrollIntoView()">
+Ver produtos
+</button>
 
 </section>
 
 <div class="categories">
 
-  <button onclick="filterProducts('Todos')">Todos</button>
-  <button onclick="filterProducts('Premium')">Premium</button>
-  <button onclick="filterProducts('Gamer')">Gamer</button>
-  <button onclick="filterProducts('Esporte')">Esporte</button>
-  <button onclick="filterProducts('Compacto')">Compactos</button>
+<button onclick="filterProducts('Todos')">Todos</button>
+<button onclick="filterProducts('Premium')">Premium</button>
+<button onclick="filterProducts('Gamer')">Gamer</button>
+<button onclick="filterProducts('Esporte')">Esporte</button>
+<button onclick="filterProducts('Compacto')">Compactos</button>
 
 </div>
 
 <main class="container" id="produtos">
 
-  <h2 class="section-title">
-    🔥 Ofertas da AudioMax
-  </h2>
+<h2 class="section-title">🔥 Ofertas da AudioMax</h2>
 
-  <div class="products" id="productList">
+<div class="products" id="productList">
 
-    <div class="product" data-category="Premium">
+<div class="product" data-category="Premium">
 
-      <img src="https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=600&q=80">
+<img src="https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=600&q=80">
 
-      <div class="product-info">
+<div class="product-info">
 
-        <span class="badge">-25%</span>
+<span class="badge">-25%</span>
 
-        <h3>AudioMax Air Pro</h3>
+<h3>AudioMax Air Pro</h3>
 
-        <div class="stars">★★★★★ (128)</div>
+<div class="stars">★★★★★ (128)</div>
 
-        <div class="old">R$ 299,90</div>
+<div class="old">R$ 299,90</div>
 
-        <div class="price">R$ 224,90</div>
+<div class="price">R$ 224,90</div>
 
-        <div class="pix">💚 à vista no Pix</div>
+<div class="pix">💚 à vista no Pix</div>
 
-        <button class="buy" onclick="addCart('AudioMax Air Pro',224.90)">
-          Comprar
-        </button>
+<button class="buy" onclick="addCart('AudioMax Air Pro',224.90)">
+Comprar
+</button>
 
-      </div>
-    </div>
+</div>
+</div>
 
 
-    <div class="product" data-category="Gamer">
+<div class="product" data-category="Gamer">
 
-      <img src="https://images.unsplash.com/photo-1599669454699-248893623440?auto=format&fit=crop&w=600&q=80">
+<img src="https://images.unsplash.com/photo-1599669454699-248893623440?auto=format&fit=crop&w=600&q=80">
 
-      <div class="product-info">
+<div class="product-info">
 
-        <span class="badge">-30%</span>
+<span class="badge">-30%</span>
 
-        <h3>AudioMax Gamer X</h3>
+<h3>AudioMax Gamer X</h3>
 
-        <div class="stars">★★★★★ (94)</div>
+<div class="stars">★★★★★ (94)</div>
 
-        <div class="old">R$ 349,90</div>
+<div class="old">R$ 349,90</div>
 
-        <div class="price">R$ 244,90</div>
+<div class="price">R$ 244,90</div>
 
-        <div class="pix">💚 à vista no Pix</div>
+<div class="pix">💚 à vista no Pix</div>
 
-        <button class="buy" onclick="addCart('AudioMax Gamer X',244.90)">
-          Comprar
-        </button>
+<button class="buy" onclick="addCart('AudioMax Gamer X',244.90)">
+Comprar
+</button>
 
-      </div>
-    </div>
+</div>
+</div>
 
 
-    <div class="product" data-category="Esporte">
+<div class="product" data-category="Esporte">
 
-      <img src="https://images.unsplash.com/photo-1578319439584-104c94d37305?auto=format&fit=crop&w=600&q=80">
+<img src="https://images.unsplash.com/photo-1578319439584-104c94d37305?auto=format&fit=crop&w=600&q=80">
 
-      <div class="product-info">
+<div class="product-info">
 
-        <span class="badge">-20%</span>
+<span class="badge">-20%</span>
 
-        <h3>AudioMax Sport</h3>
+<h3>AudioMax Sport</h3>
 
-        <div class="stars">★★★★★ (76)</div>
+<div class="stars">★★★★★ (76)</div>
 
-        <div class="old">R$ 199,90</div>
+<div class="old">R$ 199,90</div>
 
-        <div class="price">R$ 159,90</div>
+<div class="price">R$ 159,90</div>
 
-        <div class="pix">💚 à vista no Pix</div>
+<div class="pix">💚 à vista no Pix</div>
 
-        <button class="buy" onclick="addCart('AudioMax Sport',159.90)">
-          Comprar
-        </button>
+<button class="buy" onclick="addCart('AudioMax Sport',159.90)">
+Comprar
+</button>
 
-      </div>
-    </div>
+</div>
+</div>
 
 
-    <div class="product" data-category="Compacto">
+<div class="product" data-category="Compacto">
 
-      <img src="https://images.unsplash.com/photo-1588423771073-b8903fbb85b5?auto=format&fit=crop&w=600&q=80">
+<img src="https://images.unsplash.com/photo-1588423771073-b8903fbb85b5?auto=format&fit=crop&w=600&q=80">
 
-      <div class="product-info">
+<div class="product-info">
 
-        <span class="badge">-18%</span>
+<span class="badge">-18%</span>
 
-        <h3>AudioMax Mini Buds</h3>
+<h3>AudioMax Mini Buds</h3>
 
-        <div class="stars">★★★★★ (151)</div>
+<div class="stars">★★★★★ (151)</div>
 
-        <div class="old">R$ 169,90</div>
+<div class="old">R$ 169,90</div>
 
-        <div class="price">R$ 139,90</div>
+<div class="price">R$ 139,90</div>
 
-        <div class="pix">💚 à vista no Pix</div>
+<div class="pix">💚 à vista no Pix</div>
 
-        <button class="buy" onclick="addCart('AudioMax Mini Buds',139.90)">
-          Comprar
-        </button>
+<button class="buy" onclick="addCart('AudioMax Mini Buds',139.90)">
+Comprar
+</button>
 
-      </div>
-    </div>
+</div>
+</div>
 
 
-    <div class="product" data-category="Premium">
+<div class="product" data-category="Premium">
 
-      <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=80">
+<img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=80">
 
-      <div class="product-info">
+<div class="product-info">
 
-        <span class="badge">-15%</span>
+<span class="badge">-15%</span>
 
-        <h3>AudioMax Premium ANC</h3>
+<h3>AudioMax Premium ANC</h3>
 
-        <div class="stars">★★★★★ (203)</div>
+<div class="stars">★★★★★ (203)</div>
 
-        <div class="old">R$ 499,90</div>
+<div class="old">R$ 499,90</div>
 
-        <div class="price">R$ 424,90</div>
+<div class="price">R$ 424,90</div>
 
-        <div class="pix">💚 à vista no Pix</div>
+<div class="pix">💚 à vista no Pix</div>
 
-        <button class="buy" onclick="addCart('AudioMax Premium ANC',424.90)">
-          Comprar
-        </button>
+<button class="buy" onclick="addCart('AudioMax Premium ANC',424.90)">
+Comprar
+</button>
 
-      </div>
-    </div>
+</div>
+</div>
 
 
-    <div class="product" data-category="Gamer">
+<div class="product" data-category="Gamer">
 
-      <img src="https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=600&q=80">
+<img src="https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=600&q=80">
 
-      <div class="product-info">
+<div class="product-info">
 
-        <span class="badge">-22%</span>
+<span class="badge">-22%</span>
 
-        <h3>AudioMax Headset Pro</h3>
+<h3>AudioMax Headset Pro</h3>
 
-        <div class="stars">★★★★★ (87)</div>
+<div class="stars">★★★★★ (87)</div>
 
-        <div class="old">R$ 279,90</div>
+<div class="old">R$ 279,90</div>
 
-        <div class="price">R$ 219,90</div>
+<div class="price">R$ 219,90</div>
 
-        <div class="pix">💚 à vista no Pix</div>
+<div class="pix">💚 à vista no Pix</div>
 
-        <button class="buy" onclick="addCart('AudioMax Headset Pro',219.90)">
-          Comprar
-        </button>
+<button class="buy" onclick="addCart('AudioMax Headset Pro',219.90)">
+Comprar
+</button>
 
-      </div>
-    </div>
+</div>
+</div>
 
-  </div>
-
+</div>
 </main>
+
 
 <section class="payment">
 
-  <h2>💳 Formas de pagamento</h2>
+<h2>💳 Formas de pagamento</h2>
 
-  <p>Escolha a forma de pagamento disponível no checkout.</p>
+<p>Pix, cartão, Bitcoin e outras opções no checkout.</p>
 
-  <div class="methods">
-    <div class="method">💚 Pix</div>
-    <div class="method">💳 Cartão</div>
-    <div class="method">₿ Bitcoin</div>
-  </div>
+<div class="methods">
+<div class="method">💚 Pix</div>
+<div class="method">💳 Cartão</div>
+<div class="method">₿ Bitcoin</div>
+<div class="method">💵 Outras</div>
+</div>
 
 </section>
 
-<!-- CHAT DA ALICE -->
+
+<!-- MODAL DO CARRINHO -->
+
+<div class="modal" id="cartModal">
+
+<div class="modal-box">
+
+<button class="close" onclick="closeCart()">×</button>
+
+<h2>🛒 Seu carrinho</h2>
+
+<div id="cartItems"></div>
+
+<div class="total">
+Total: R$ <span id="cartTotal">0,00</span>
+</div>
+
+<button class="checkout" onclick="openPayment()">
+Finalizar compra
+</button>
+
+</div>
+</div>
+
+
+<!-- MODAL DE PAGAMENTO -->
+
+<div class="modal" id="paymentModal">
+
+<div class="modal-box">
+
+<button class="close" onclick="closePayment()">×</button>
+
+<h2>💳 Como você quer pagar?</h2>
+
+<div class="payment-options">
+
+<button class="payment-option" onclick="choosePayment('Pix')">
+💚 <b>Pix</b><br>
+Pagamento via Pix
+</button>
+
+<button class="payment-option" onclick="choosePayment('Cartão')">
+💳 <b>Cartão</b><br>
+Cartão de crédito ou débito
+</button>
+
+<button class="payment-option" onclick="choosePayment('Bitcoin')">
+₿ <b>Bitcoin</b><br>
+Pagamento em criptomoeda
+</button>
+
+<button class="payment-option" onclick="choosePayment('Outra forma')">
+💵 <b>Outra forma de pagamento</b><br>
+Consulte as opções disponíveis
+</button>
+
+</div>
+
+<div class="note">
+O checkout desta versão é demonstrativo. Para receber pagamentos reais,
+é necessário conectar um provedor de pagamento.
+</div>
+
+</div>
+</div>
+
+
+<!-- ALICE -->
 
 <button class="alice-button" onclick="toggleAlice()">
-  🤖
+🤖
 </button>
 
 <div class="chat" id="aliceChat">
 
-  <div class="chat-header">
-    🤖 Alice — Assistente AudioMax
-  </div>
+<div class="chat-header">
+🤖 Alice — Assistente AudioMax
+</div>
 
-  <div class="chat-body" id="chatBody">
+<div class="chat-body" id="chatBody">
 
-    <div class="message alice">
-      Olá! Eu sou a Alice, assistente da AudioMax. 👋<br><br>
-      Posso ajudar você com produtos, preços, Pix, cartão,
-      Bitcoin e dúvidas sobre a loja.
-    </div>
-
-  </div>
-
-  <div class="chat-input">
-
-    <input
-      id="aliceInput"
-      type="text"
-      placeholder="Digite sua dúvida..."
-      onkeydown="if(event.key==='Enter') sendAlice()"
-    >
-
-    <button onclick="sendAlice()">Enviar</button>
-
-  </div>
+<div class="message alice">
+Olá! Eu sou a Alice, assistente da AudioMax. 👋<br><br>
+Posso ajudar com produtos, preços e formas de pagamento.
+</div>
 
 </div>
 
+<div class="chat-input">
+
+<input
+id="aliceInput"
+placeholder="Digite sua dúvida..."
+onkeydown="if(event.key==='Enter') sendAlice()"
+>
+
+<button onclick="sendAlice()">Enviar</button>
+
+</div>
+
+</div>
+
+
 <footer>
 
-  <h3>AudioMax</h3>
-
-  <p>Seu som. Seu momento.</p>
-
-  <p>© 2026 AudioMax — Loja de áudio e tecnologia.</p>
+<h3>AudioMax</h3>
+<p>Seu som. Seu momento.</p>
+<p>© 2026 AudioMax</p>
 
 </footer>
+
 
 <script>
 
 let cart = [];
 
+
 function addCart(name,price){
 
-  cart.push({
-    name:name,
-    price:price
-  });
+cart.push({
+name:name,
+price:price
+});
 
-  document.getElementById("cartCount").innerText = cart.length;
+updateCart();
 
-  alert(name + " foi adicionado ao carrinho!");
+alert(name + " foi adicionado ao carrinho! 🛒");
+
 }
 
 
-function showCart(){
+function updateCart(){
 
-  if(cart.length === 0){
-    alert("Seu carrinho está vazio.");
-    return;
-  }
+document.getElementById("cartCount").innerText = cart.length;
 
-  let total = 0;
-  let text = "🛒 Seu carrinho:\\n\\n";
+}
 
-  cart.forEach((item,index)=>{
 
-    text +=
-      (index+1) +
-      ". " +
-      item.name +
-      " - R$ " +
-      item.price.toFixed(2).replace(".",",") +
-      "\\n";
+function openCart(){
 
-    total += item.price;
+renderCart();
 
-  });
+document.getElementById("cartModal").style.display="flex";
 
-  text +=
-    "\\nTotal: R$ " +
-    total.toFixed(2).replace(".",",");
+}
 
-  alert(text);
+
+function closeCart(){
+
+document.getElementById("cartModal").style.display="none";
+
+}
+
+
+function renderCart(){
+
+const container =
+document.getElementById("cartItems");
+
+container.innerHTML="";
+
+if(cart.length===0){
+
+container.innerHTML =
+"<p>Seu carrinho está vazio.</p>";
+
+document.getElementById("cartTotal").innerText="0,00";
+
+return;
+
+}
+
+let total=0;
+
+cart.forEach((item,index)=>{
+
+total += item.price;
+
+const div =
+document.createElement("div");
+
+div.className="cart-item";
+
+div.innerHTML=`
+
+<div>
+<b>${item.name}</b><br>
+R$ ${item.price.toFixed(2).replace(".",",")}
+</div>
+
+<button class="remove" onclick="removeItem(${index})">
+Remover
+</button>
+
+`;
+
+container.appendChild(div);
+
+});
+
+document.getElementById("cartTotal").innerText =
+total.toFixed(2).replace(".",",");
+
+}
+
+
+function removeItem(index){
+
+cart.splice(index,1);
+
+updateCart();
+
+renderCart();
+
+}
+
+
+function openPayment(){
+
+if(cart.length===0){
+
+alert("Seu carrinho está vazio.");
+
+return;
+
+}
+
+closeCart();
+
+document.getElementById("paymentModal").style.display="flex";
+
+}
+
+
+function closePayment(){
+
+document.getElementById("paymentModal").style.display="none";
+
+}
+
+
+function choosePayment(method){
+
+let total=0;
+
+cart.forEach(item=>{
+total += item.price;
+});
+
+alert(
+"Forma escolhida: " + method +
+"\n\nTotal: R$ " +
+total.toFixed(2).replace(".",",") +
+"\n\nO próximo passo será o checkout de " +
+method + "."
+);
+
+closePayment();
 
 }
 
 
 function filterProducts(category){
 
-  const products =
-    document.querySelectorAll(".product");
+const products =
+document.querySelectorAll(".product");
 
-  products.forEach(product=>{
+products.forEach(product=>{
 
-    if(
-      category === "Todos" ||
-      product.dataset.category === category
-    ){
+if(
+category==="Todos" ||
+product.dataset.category===category
+){
 
-      product.style.display = "";
+product.style.display="";
 
-    }else{
+}else{
 
-      product.style.display = "none";
+product.style.display="none";
 
-    }
+}
 
-  });
+});
 
 }
 
 
 function searchProducts(){
 
-  const search =
-    document.getElementById("searchInput")
-    .value
-    .toLowerCase();
+const search =
+document.getElementById("searchInput")
+.value
+.toLowerCase();
 
-  const products =
-    document.querySelectorAll(".product");
+const products =
+document.querySelectorAll(".product");
 
-  products.forEach(product=>{
+products.forEach(product=>{
 
-    const name =
-      product.querySelector("h3")
-      .innerText
-      .toLowerCase();
+const name =
+product.querySelector("h3")
+.innerText
+.toLowerCase();
 
-    if(name.includes(search)){
-      product.style.display = "";
-    }else{
-      product.style.display = "none";
-    }
+product.style.display =
+name.includes(search) ? "" : "none";
 
-  });
+});
 
 }
 
 
 function toggleAlice(){
 
-  const chat =
-    document.getElementById("aliceChat");
+const chat =
+document.getElementById("aliceChat");
 
-  if(chat.style.display === "block"){
-    chat.style.display = "none";
-  }else{
-    chat.style.display = "block";
-  }
+chat.style.display =
+chat.style.display==="block"
+? "none"
+: "block";
 
 }
 
 
 function sendAlice(){
 
-  const input =
-    document.getElementById("aliceInput");
+const input =
+document.getElementById("aliceInput");
 
-  const question =
-    input.value.trim();
+const question =
+input.value.trim();
 
-  if(!question) return;
+if(!question) return;
 
-  const body =
-    document.getElementById("chatBody");
+const body =
+document.getElementById("chatBody");
 
-  const userMessage =
-    document.createElement("div");
+const user =
+document.createElement("div");
 
-  userMessage.className = "message user";
+user.className="message user";
 
-  userMessage.innerText = question;
+user.innerText=question;
 
-  body.appendChild(userMessage);
+body.appendChild(user);
 
-  input.value = "";
+input.value="";
 
-  setTimeout(()=>{
+const q=question.toLowerCase();
 
-    const answer =
-      document.createElement("div");
+let response =
+"Posso ajudar com produtos, preços, carrinho, Pix, cartão ou Bitcoin. 😊";
 
-    answer.className = "message alice";
 
-    const q = question.toLowerCase();
+if(q.includes("pix")){
 
-    let response =
-      "Posso ajudar com produtos, preços, pagamento, Pix, cartão ou Bitcoin. O que você gostaria de saber?";
+response =
+"O Pix é uma das opções de pagamento disponíveis no checkout.";
 
-    if(q.includes("pix")){
-      response =
-        "Aceitamos Pix como opção de pagamento. O pagamento real precisa ser conectado ao sistema de checkout da loja.";
-    }
+}
 
-    else if(q.includes("cartão") || q.includes("cartao")){
-      response =
-        "Você pode escolher cartão no checkout. A cobrança real precisa ser configurada com um provedor de pagamento.";
-    }
+else if(q.includes("cartão") || q.includes("cartao")){
 
-    else if(q.includes("bitcoin")){
-      response =
-        "Bitcoin está disponível como opção no site. Para receber Bitcoin de verdade, será necessário conectar uma carteira ou serviço de pagamento.";
-    }
+response =
+"Você pode escolher cartão na etapa de pagamento.";
 
-    else if(q.includes("air pro")){
-      response =
-        "O AudioMax Air Pro está em oferta por R$ 224,90.";
-    }
+}
 
-    else if(q.includes("gamer")){
-      response =
-        "O AudioMax Gamer X custa R$ 244,90 e é uma opção voltada para jogos.";
-    }
+else if(q.includes("bitcoin")){
 
-    else if(q.includes("mini")){
-      response =
-        "O AudioMax Mini Buds custa R$ 139,90 e é uma opção compacta.";
-    }
+response =
+"Bitcoin também aparece como opção de pagamento.";
 
-    else if(q.includes("entrega") || q.includes("frete")){
-      response =
-        "A disponibilidade e o valor da entrega precisam ser definidos pela loja no checkout.";
-    }
+}
 
-    else if(q.includes("oi") || q.includes("olá") || q.includes("ola")){
-      response =
-        "Olá! 👋 Eu sou a Alice. Como posso ajudar você com a AudioMax?";
-    }
+else if(q.includes("air pro")){
 
-    answer.innerText = response;
+response =
+"O AudioMax Air Pro está por R$ 224,90.";
 
-    body.appendChild(answer);
+}
 
-    body.scrollTop = body.scrollHeight;
+else if(q.includes("gamer")){
 
-  },500);
+response =
+"O AudioMax Gamer X está por R$ 244,90.";
+
+}
+
+else if(q.includes("mini")){
+
+response =
+"O AudioMax Mini Buds está por R$ 139,90.";
+
+}
+
+else if(
+q.includes("oi") ||
+q.includes("olá") ||
+q.includes("ola")
+){
+
+response =
+"Olá! 👋 Eu sou a Alice. Como posso ajudar?";
+
+}
+
+
+setTimeout(()=>{
+
+const answer =
+document.createElement("div");
+
+answer.className="message alice";
+
+answer.innerText=response;
+
+body.appendChild(answer);
+
+body.scrollTop=body.scrollHeight;
+
+},400);
 
 }
 
 </script>
 
 </body>
-          </html>
+                    </html>
