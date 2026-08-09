@@ -3,1148 +3,725 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AudioMax - Fones Bluetooth</title>
+<title>AudioMax IA</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:Arial,sans-serif;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
 }
 
-body{
-  background:#f5f6f8;
-  color:#171717;
+body {
+    background: #050810;
+    color: white;
+    min-height: 100vh;
 }
 
-header{
-  background:#111;
-  color:white;
-  position:sticky;
-  top:0;
-  z-index:1000;
+.container {
+    display: flex;
+    min-height: 100vh;
 }
 
-.top{
-  max-width:1200px;
-  margin:auto;
-  padding:18px 20px;
-  display:flex;
-  align-items:center;
-  gap:20px;
+/* MENU */
+.sidebar {
+    width: 260px;
+    background: #080d17;
+    border-right: 1px solid #20283a;
+    padding: 25px 18px;
 }
 
-.logo{
-  font-size:28px;
-  font-weight:bold;
-  white-space:nowrap;
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 35px;
+    text-align: center;
 }
 
-.logo span{
-  color:#ff5a00;
+.logo span {
+    color: #6366f1;
 }
 
-.search{
-  flex:1;
-  display:flex;
+.new-chat {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #6366f1;
+    border-radius: 10px;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    margin-bottom: 25px;
 }
 
-.search input{
-  width:100%;
-  padding:14px;
-  border:0;
-  border-radius:8px 0 0 8px;
-  font-size:16px;
+.menu-title {
+    color: #8992a7;
+    font-size: 13px;
+    margin-bottom: 10px;
 }
 
-.search button{
-  border:0;
-  background:#ff5a00;
-  color:white;
-  padding:0 20px;
-  border-radius:0 8px 8px 0;
-  cursor:pointer;
+.menu-item {
+    padding: 13px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #0c1220;
+    cursor: pointer;
 }
 
-.cart{
-  background:#ff5a00;
-  border:0;
-  color:white;
-  padding:13px 16px;
-  border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
+.menu-item:hover {
+    background: #151d30;
 }
 
-.hero{
-  max-width:1200px;
-  margin:20px auto;
-  padding:55px 25px;
-  border-radius:18px;
-  color:white;
-  background:linear-gradient(120deg,#111,#292929,#ff5a00);
+/* CHAT */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 1100px;
+    margin: auto;
+    width: 100%;
 }
 
-.hero h1{
-  font-size:48px;
-  margin-bottom:15px;
+.header {
+    padding: 25px;
+    text-align: center;
+    border-bottom: 1px solid #20283a;
 }
 
-.hero p{
-  font-size:19px;
-  line-height:1.5;
+.header h1 {
+    font-size: 22px;
 }
 
-.hero button{
-  margin-top:25px;
-  background:white;
-  color:#111;
-  border:0;
-  padding:14px 22px;
-  border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
+.header p {
+    color: #8992a7;
+    margin-top: 7px;
 }
 
-.categories{
-  max-width:1200px;
-  margin:25px auto;
-  padding:0 20px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
+.chat {
+    flex: 1;
+    padding: 25px;
+    overflow-y: auto;
 }
 
-.categories button{
-  padding:11px 18px;
-  border:1px solid #ddd;
-  background:white;
-  border-radius:8px;
-  cursor:pointer;
+.message {
+    display: flex;
+    margin-bottom: 20px;
 }
 
-.categories button:hover{
-  background:#ff5a00;
-  color:white;
+.message.user {
+    justify-content: flex-end;
 }
 
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:20px;
+.message.ai {
+    justify-content: flex-start;
 }
 
-.section-title{
-  font-size:30px;
-  margin:20px 0;
+.bubble {
+    max-width: 75%;
+    padding: 15px 18px;
+    border-radius: 14px;
+    line-height: 1.5;
 }
 
-.products{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-  gap:20px;
+.user .bubble {
+    background: #303b61;
 }
 
-.product{
-  background:white;
-  border-radius:15px;
-  overflow:hidden;
-  border:1px solid #e5e5e5;
-  box-shadow:0 4px 15px rgba(0,0,0,.06);
+.ai .bubble {
+    background: #111827;
+    border: 1px solid #263149;
 }
 
-.product img{
-  width:100%;
-  height:220px;
-  object-fit:contain;
-  background:#fafafa;
+.input-area {
+    padding: 20px;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid #20283a;
 }
 
-.product-info{
-  padding:17px;
+.input-area input {
+    flex: 1;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid #303a50;
+    background: #0c1220;
+    color: white;
+    outline: none;
 }
 
-.badge{
-  display:inline-block;
-  background:#ff5a00;
-  color:white;
-  padding:6px 10px;
-  border-radius:6px;
-  font-size:13px;
+.input-area button {
+    width: 55px;
+    border: none;
+    border-radius: 10px;
+    background: #6366f1;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
 }
 
-.product h3{
-  font-size:19px;
-  margin:10px 0;
+/* PAINEL DO DONO */
+.owner-panel {
+    display: none;
+    margin: 15px 0;
+    padding: 20px;
+    background: #0b1220;
+    border: 1px solid #39456a;
+    border-radius: 15px;
 }
 
-.stars{
-  color:#ffb400;
-  margin:8px 0;
+.owner-panel h2 {
+    margin-bottom: 8px;
 }
 
-.old{
-  color:#888;
-  text-decoration:line-through;
+.owner-panel p {
+    color: #aeb7c9;
+    margin-bottom: 20px;
 }
 
-.price{
-  color:#18864b;
-  font-size:25px;
-  font-weight:bold;
-  margin:6px 0;
+.owner-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
 }
 
-.pix{
-  color:#18864b;
-  font-size:14px;
-  font-weight:bold;
+.owner-card {
+    background: #111a2b;
+    border: 1px solid #273653;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
 }
 
-.buy{
-  width:100%;
-  margin-top:12px;
-  padding:13px;
-  background:#ff5a00;
-  color:white;
-  border:0;
-  border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
+.owner-card:hover {
+    border-color: #6366f1;
 }
 
-.buy:hover{
-  background:#df4d00;
+.owner-card h3 {
+    margin-bottom: 8px;
 }
 
-.payment{
-  margin-top:40px;
-  background:#111;
-  color:white;
-  padding:35px 20px;
-  text-align:center;
+.owner-card p {
+    font-size: 13px;
+    margin: 0;
 }
 
-.methods{
-  display:flex;
-  justify-content:center;
-  gap:15px;
-  flex-wrap:wrap;
-  margin-top:20px;
+.close-panel {
+    margin-top: 15px;
+    padding: 10px 18px;
+    background: transparent;
+    border: 1px solid #6366f1;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
 }
 
-.method{
-  background:#222;
-  padding:15px 22px;
-  border-radius:10px;
-}
+@media (max-width: 700px) {
+    .sidebar {
+        display: none;
+    }
 
-.alice-button{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  width:65px;
-  height:65px;
-  border-radius:50%;
-  border:0;
-  background:#ff5a00;
-  color:white;
-  font-size:27px;
-  box-shadow:0 5px 20px rgba(0,0,0,.3);
-  cursor:pointer;
-  z-index:2000;
-}
+    .owner-grid {
+        grid-template-columns: 1fr;
+    }
 
-.chat{
-  display:none;
-  position:fixed;
-  right:20px;
-  bottom:95px;
-  width:330px;
-  max-width:calc(100% - 40px);
-  background:white;
-  border-radius:15px;
-  box-shadow:0 8px 35px rgba(0,0,0,.25);
-  overflow:hidden;
-  z-index:1999;
-}
-
-.chat-header{
-  background:#111;
-  color:white;
-  padding:17px;
-  font-weight:bold;
-}
-
-.chat-body{
-  height:300px;
-  overflow-y:auto;
-  padding:15px;
-}
-
-.message{
-  padding:10px 12px;
-  border-radius:10px;
-  margin-bottom:10px;
-  max-width:85%;
-  line-height:1.4;
-}
-
-.alice{
-  background:#eee;
-}
-
-.user{
-  background:#ff5a00;
-  color:white;
-  margin-left:auto;
-}
-
-.chat-input{
-  display:flex;
-  border-top:1px solid #ddd;
-}
-
-.chat-input input{
-  flex:1;
-  border:0;
-  padding:13px;
-  outline:none;
-}
-
-.chat-input button{
-  border:0;
-  background:#ff5a00;
-  color:white;
-  padding:0 17px;
-}
-
-footer{
-  background:#111;
-  color:#aaa;
-  text-align:center;
-  padding:30px 20px;
-}
-
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.65);
-  z-index:3000;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
-
-.modal-box{
-  background:white;
-  width:500px;
-  max-width:100%;
-  max-height:90vh;
-  overflow:auto;
-  border-radius:16px;
-  padding:25px;
-}
-
-.modal-box h2{
-  margin-bottom:20px;
-}
-
-.close{
-  float:right;
-  border:0;
-  background:#eee;
-  width:35px;
-  height:35px;
-  border-radius:50%;
-  cursor:pointer;
-}
-
-.cart-item{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  padding:12px 0;
-  border-bottom:1px solid #ddd;
-}
-
-.remove{
-  background:#e53935;
-  color:white;
-  border:0;
-  padding:7px 10px;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-.total{
-  font-size:22px;
-  font-weight:bold;
-  margin:20px 0;
-}
-
-.checkout{
-  width:100%;
-  padding:15px;
-  background:#ff5a00;
-  color:white;
-  border:0;
-  border-radius:8px;
-  font-size:17px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.payment-options{
-  display:grid;
-  gap:12px;
-}
-
-.payment-option{
-  border:2px solid #ddd;
-  padding:18px;
-  border-radius:10px;
-  background:white;
-  text-align:left;
-  cursor:pointer;
-  font-size:16px;
-}
-
-.payment-option:hover{
-  border-color:#ff5a00;
-  background:#fff7f2;
-}
-
-.note{
-  margin-top:15px;
-  padding:12px;
-  background:#f3f3f3;
-  border-radius:8px;
-  font-size:13px;
-  color:#555;
-}
-
-@media(max-width:700px){
-
-  .top{
-    flex-wrap:wrap;
-  }
-
-  .logo{
-    width:100%;
-  }
-
-  .search{
-    order:3;
-    width:100%;
-  }
-
-  .hero{
-    margin:10px;
-    padding:35px 20px;
-  }
-
-  .hero h1{
-    font-size:36px;
-  }
-
-  .container{
-    padding:15px;
-  }
-
-  .products{
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
-  }
-
-  .product img{
-    height:160px;
-  }
-
-  .product-info{
-    padding:12px;
-  }
-
-  .product h3{
-    font-size:16px;
-  }
-
-  .price{
-    font-size:21px;
-  }
-}
-
-@media(max-width:430px){
-  .products{
-    grid-template-columns:1fr;
-  }
-
-  .product img{
-    height:220px;
-  }
+    .bubble {
+        max-width: 90%;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<header>
+<div class="container">
 
-<div class="top">
+    <!-- MENU NORMAL -->
+    <aside class="sidebar">
 
-<div class="logo">
-Audio<span>Max</span>
-</div>
+        <div class="logo">
+            Audio<span>Max</span>
+        </div>
 
-<div class="search">
-<input id="searchInput" placeholder="Encontre seu fone...">
-<button onclick="searchProducts()">🔎</button>
-</div>
+        <button class="new-chat" onclick="novaConversa()">
+            + Nova conversa
+        </button>
 
-<button class="cart" onclick="openCart()">
-🛒 Carrinho (<span id="cartCount">0</span>)
-</button>
+        <div class="menu-title">
+            CONVERSAS RECENTES
+        </div>
 
-</div>
+        <div class="menu-item">
+            🎧 Fones Bluetooth
+        </div>
 
-</header>
+        <div class="menu-item">
+            💳 Formas de pagamento
+        </div>
 
-<section class="hero">
+        <div class="menu-item">
+            📦 Entrega e prazos
+        </div>
 
-<h1>Seu som.<br>Seu momento.</h1>
+        <!--
+            O PAINEL DO DONO NÃO APARECE AQUI.
+            ELE SÓ É ACESSADO PELA IA.
+        -->
 
-<p>
-Fones Bluetooth para música, jogos,
-estudos e seu dia a dia.
-</p>
-
-<button onclick="document.getElementById('produtos').scrollIntoView()">
-Ver produtos
-</button>
-
-</section>
-
-<div class="categories">
-
-<button onclick="filterProducts('Todos')">Todos</button>
-<button onclick="filterProducts('Premium')">Premium</button>
-<button onclick="filterProducts('Gamer')">Gamer</button>
-<button onclick="filterProducts('Esporte')">Esporte</button>
-<button onclick="filterProducts('Compacto')">Compactos</button>
-
-</div>
-
-<main class="container" id="produtos">
-
-<h2 class="section-title">🔥 Ofertas da AudioMax</h2>
-
-<div class="products" id="productList">
-
-<div class="product" data-category="Premium">
-
-<img src="https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=600&q=80">
-
-<div class="product-info">
-
-<span class="badge">-25%</span>
-
-<h3>AudioMax Air Pro</h3>
-
-<div class="stars">★★★★★ (128)</div>
-
-<div class="old">R$ 299,90</div>
-
-<div class="price">R$ 224,90</div>
-
-<div class="pix">💚 à vista no Pix</div>
-
-<button class="buy" onclick="addCart('AudioMax Air Pro',224.90)">
-Comprar
-</button>
-
-</div>
-</div>
+    </aside>
 
 
-<div class="product" data-category="Gamer">
+    <!-- ÁREA PRINCIPAL -->
+    <main class="main">
 
-<img src="https://images.unsplash.com/photo-1599669454699-248893623440?auto=format&fit=crop&w=600&q=80">
+        <header class="header">
+            <h1>🤖 IA da AudioMax</h1>
+            <p>Assistente virtual da loja</p>
+        </header>
 
-<div class="product-info">
 
-<span class="badge">-30%</span>
+        <section class="chat" id="chat">
 
-<h3>AudioMax Gamer X</h3>
+            <div class="message ai">
+                <div class="bubble">
+                    👋 Olá! Eu sou a IA da AudioMax.<br>
+                    Como posso ajudar?
+                </div>
+            </div>
 
-<div class="stars">★★★★★ (94)</div>
+        </section>
 
-<div class="old">R$ 349,90</div>
 
-<div class="price">R$ 244,90</div>
+        <!-- ÁREA DE DIGITAÇÃO -->
+        <div class="input-area">
 
-<div class="pix">💚 à vista no Pix</div>
+            <input
+                type="text"
+                id="messageInput"
+                placeholder="Digite sua mensagem..."
+                autocomplete="off"
+            >
 
-<button class="buy" onclick="addCart('AudioMax Gamer X',244.90)">
-Comprar
-</button>
+            <button onclick="enviarMensagem()">➤</button>
+
+        </div>
+
+    </main>
 
 </div>
-</div>
-
-
-<div class="product" data-category="Esporte">
-
-<img src="https://images.unsplash.com/photo-1578319439584-104c94d37305?auto=format&fit=crop&w=600&q=80">
-
-<div class="product-info">
-
-<span class="badge">-20%</span>
-
-<h3>AudioMax Sport</h3>
-
-<div class="stars">★★★★★ (76)</div>
-
-<div class="old">R$ 199,90</div>
-
-<div class="price">R$ 159,90</div>
-
-<div class="pix">💚 à vista no Pix</div>
-
-<button class="buy" onclick="addCart('AudioMax Sport',159.90)">
-Comprar
-</button>
-
-</div>
-</div>
-
-
-<div class="product" data-category="Compacto">
-
-<img src="https://images.unsplash.com/photo-1588423771073-b8903fbb85b5?auto=format&fit=crop&w=600&q=80">
-
-<div class="product-info">
-
-<span class="badge">-18%</span>
-
-<h3>AudioMax Mini Buds</h3>
-
-<div class="stars">★★★★★ (151)</div>
-
-<div class="old">R$ 169,90</div>
-
-<div class="price">R$ 139,90</div>
-
-<div class="pix">💚 à vista no Pix</div>
-
-<button class="buy" onclick="addCart('AudioMax Mini Buds',139.90)">
-Comprar
-</button>
-
-</div>
-</div>
-
-
-<div class="product" data-category="Premium">
-
-<img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=80">
-
-<div class="product-info">
-
-<span class="badge">-15%</span>
-
-<h3>AudioMax Premium ANC</h3>
-
-<div class="stars">★★★★★ (203)</div>
-
-<div class="old">R$ 499,90</div>
-
-<div class="price">R$ 424,90</div>
-
-<div class="pix">💚 à vista no Pix</div>
-
-<button class="buy" onclick="addCart('AudioMax Premium ANC',424.90)">
-Comprar
-</button>
-
-</div>
-</div>
-
-
-<div class="product" data-category="Gamer">
-
-<img src="https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=600&q=80">
-
-<div class="product-info">
-
-<span class="badge">-22%</span>
-
-<h3>AudioMax Headset Pro</h3>
-
-<div class="stars">★★★★★ (87)</div>
-
-<div class="old">R$ 279,90</div>
-
-<div class="price">R$ 219,90</div>
-
-<div class="pix">💚 à vista no Pix</div>
-
-<button class="buy" onclick="addCart('AudioMax Headset Pro',219.90)">
-Comprar
-</button>
-
-</div>
-</div>
-
-</div>
-</main>
-
-
-<section class="payment">
-
-<h2>💳 Formas de pagamento</h2>
-
-<p>Pix, cartão, Bitcoin e outras opções no checkout.</p>
-
-<div class="methods">
-<div class="method">💚 Pix</div>
-<div class="method">💳 Cartão</div>
-<div class="method">₿ Bitcoin</div>
-<div class="method">💵 Outras</div>
-</div>
-
-</section>
-
-
-<!-- MODAL DO CARRINHO -->
-
-<div class="modal" id="cartModal">
-
-<div class="modal-box">
-
-<button class="close" onclick="closeCart()">×</button>
-
-<h2>🛒 Seu carrinho</h2>
-
-<div id="cartItems"></div>
-
-<div class="total">
-Total: R$ <span id="cartTotal">0,00</span>
-</div>
-
-<button class="checkout" onclick="openPayment()">
-Finalizar compra
-</button>
-
-</div>
-</div>
-
-
-<!-- MODAL DE PAGAMENTO -->
-
-<div class="modal" id="paymentModal">
-
-<div class="modal-box">
-
-<button class="close" onclick="closePayment()">×</button>
-
-<h2>💳 Como você quer pagar?</h2>
-
-<div class="payment-options">
-
-<button class="payment-option" onclick="choosePayment('Pix')">
-💚 <b>Pix</b><br>
-Pagamento via Pix
-</button>
-
-<button class="payment-option" onclick="choosePayment('Cartão')">
-💳 <b>Cartão</b><br>
-Cartão de crédito ou débito
-</button>
-
-<button class="payment-option" onclick="choosePayment('Bitcoin')">
-₿ <b>Bitcoin</b><br>
-Pagamento em criptomoeda
-</button>
-
-<button class="payment-option" onclick="choosePayment('Outra forma')">
-💵 <b>Outra forma de pagamento</b><br>
-Consulte as opções disponíveis
-</button>
-
-</div>
-
-<div class="note">
-O checkout desta versão é demonstrativo. Para receber pagamentos reais,
-é necessário conectar um provedor de pagamento.
-</div>
-
-</div>
-</div>
-
-
-<!-- ALICE -->
-
-<button class="alice-button" onclick="toggleAlice()">
-🤖
-</button>
-
-<div class="chat" id="aliceChat">
-
-<div class="chat-header">
-🤖 Alice — Assistente AudioMax
-</div>
-
-<div class="chat-body" id="chatBody">
-
-<div class="message alice">
-Olá! Eu sou a Alice, assistente da AudioMax. 👋<br><br>
-Posso ajudar com produtos, preços e formas de pagamento.
-</div>
-
-</div>
-
-<div class="chat-input">
-
-<input
-id="aliceInput"
-placeholder="Digite sua dúvida..."
-onkeydown="if(event.key==='Enter') sendAlice()"
->
-
-<button onclick="sendAlice()">Enviar</button>
-
-</div>
-
-</div>
-
-
-<footer>
-
-<h3>AudioMax</h3>
-<p>Seu som. Seu momento.</p>
-<p>© 2026 AudioMax</p>
-
-</footer>
 
 
 <script>
 
-let cart = [];
+const SENHA_DONO = "Marco10";
+const NOME_DONO = "Marco Antônio";
+
+let esperandoSenha = false;
+let painelAberto = false;
 
 
-function addCart(name,price){
+/* ADICIONAR MENSAGEM */
+function adicionarMensagem(texto, tipo) {
 
-cart.push({
-name:name,
-price:price
-});
+    const chat = document.getElementById("chat");
 
-updateCart();
+    const message = document.createElement("div");
+    message.className = "message " + tipo;
 
-alert(name + " foi adicionado ao carrinho! 🛒");
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
 
+    bubble.innerHTML = texto;
+
+    message.appendChild(bubble);
+    chat.appendChild(message);
+
+    chat.scrollTop = chat.scrollHeight;
 }
 
 
-function updateCart(){
+/* ENVIAR MENSAGEM */
+function enviarMensagem() {
 
-document.getElementById("cartCount").innerText = cart.length;
+    const input = document.getElementById("messageInput");
 
+    const mensagemOriginal = input.value.trim();
+
+    if (!mensagemOriginal) return;
+
+    adicionarMensagem(mensagemOriginal, "user");
+
+    input.value = "";
+
+    setTimeout(() => {
+
+        responderIA(mensagemOriginal);
+
+    }, 400);
 }
 
 
-function openCart(){
+/* INTELIGÊNCIA DA IA */
+function responderIA(mensagem) {
 
-renderCart();
+    const texto = mensagem
+        .toLowerCase()
+        .trim();
 
-document.getElementById("cartModal").style.display="flex";
 
+    /*
+    ==========================================
+    ACESSO AO PAINEL DO DONO
+    ==========================================
+    */
+
+    if (
+        texto === "painel do dono" ||
+        texto === "painel dono" ||
+        texto === "abrir painel do dono"
+    ) {
+
+        if (painelAberto) {
+
+            adicionarMensagem(
+                "O painel do dono já está aberto.",
+                "ai"
+            );
+
+            return;
+        }
+
+        esperandoSenha = true;
+
+        adicionarMensagem(
+            "🔐 Acesso ao painel do dono solicitado.<br><br>" +
+            "Qual é a senha?",
+            "ai"
+        );
+
+        return;
+    }
+
+
+    /*
+    ==========================================
+    VERIFICAÇÃO DA SENHA
+    ==========================================
+    */
+
+    if (esperandoSenha) {
+
+        if (mensagemOriginalEhSenha(texto)) {
+
+            esperandoSenha = false;
+            painelAberto = true;
+
+            adicionarMensagem(
+                "✅ <strong>Acesso autorizado!</strong><br><br>" +
+                "Bem-vindo ao painel do dono, " +
+                NOME_DONO + ".",
+                "ai"
+            );
+
+            mostrarPainel();
+
+        } else {
+
+            esperandoSenha = false;
+
+            adicionarMensagem(
+                "❌ Senha incorreta.<br><br>" +
+                "O acesso ao painel foi negado.",
+                "ai"
+            );
+        }
+
+        return;
+    }
+
+
+    /*
+    ==========================================
+    QUEM É O DONO?
+    ==========================================
+    */
+
+    if (
+        texto.includes("quem é o dono") ||
+        texto.includes("quem que é o dono") ||
+        texto.includes("dono do site") ||
+        texto.includes("dono dela") ||
+        texto.includes("quem criou o site") ||
+        texto.includes("quem criou a loja")
+    ) {
+
+        adicionarMensagem(
+            "👑 O dono do site e da AudioMax é " +
+            "<strong>" + NOME_DONO + "</strong>.",
+            "ai"
+        );
+
+        return;
+    }
+
+
+    /*
+    ==========================================
+    SAUDAÇÕES
+    ==========================================
+    */
+
+    if (
+        texto === "oi" ||
+        texto === "olá" ||
+        texto === "ola" ||
+        texto.includes("bom dia") ||
+        texto.includes("boa tarde") ||
+        texto.includes("boa noite")
+    ) {
+
+        adicionarMensagem(
+            "Olá! 👋 Sou a IA da AudioMax. " +
+            "Posso ajudar com produtos, pedidos, pagamentos, " +
+            "entregas ou informações sobre a loja.",
+            "ai"
+        );
+
+        return;
+    }
+
+
+    /*
+    ==========================================
+    PRODUTOS
+    ==========================================
+    */
+
+    if (
+        texto.includes("fone") ||
+        texto.includes("produto") ||
+        texto.includes("bluetooth")
+    ) {
+
+        adicionarMensagem(
+            "🎧 A AudioMax é especializada em " +
+            "fones Bluetooth e acessórios de áudio.",
+            "ai"
+        );
+
+        return;
+    }
+
+
+    /*
+    ==========================================
+    PAGAMENTO
+    ==========================================
+    */
+
+    if (
+        texto.includes("pagamento") ||
+        texto.includes("pix") ||
+        texto.includes("cartão")
+    ) {
+
+        adicionarMensagem(
+            "💳 A AudioMax pode oferecer diferentes " +
+            "formas de pagamento, como Pix e cartão.",
+            "ai"
+        );
+
+        return;
+    }
+
+
+    /*
+    ==========================================
+    RESPOSTA PADRÃO
+    ==========================================
+    */
+
+    adicionarMensagem(
+        "🤖 Ainda estou aprendendo. Você pode perguntar " +
+        "sobre os produtos, pagamentos, entregas ou " +
+        "escrever <strong>painel do dono</strong>.",
+        "ai"
+    );
 }
 
 
-function closeCart(){
+/*
+==========================================
+VERIFICAR SENHA
+==========================================
+*/
 
-document.getElementById("cartModal").style.display="none";
+function mensagemOriginalEhSenha(texto) {
 
+    return texto === SENHA_DONO.toLowerCase();
 }
 
 
-function renderCart(){
+/*
+==========================================
+MOSTRAR PAINEL
+==========================================
+*/
 
-const container =
-document.getElementById("cartItems");
+function mostrarPainel() {
 
-container.innerHTML="";
+    const chat = document.getElementById("chat");
 
-if(cart.length===0){
+    const painel = document.createElement("div");
 
-container.innerHTML =
-"<p>Seu carrinho está vazio.</p>";
+    painel.className = "message ai";
 
-document.getElementById("cartTotal").innerText="0,00";
+    painel.innerHTML = `
 
-return;
+        <div class="bubble" style="width:100%;">
 
-}
+            <div class="owner-panel" style="display:block;">
 
-let total=0;
+                <h2>👑 Painel do Dono</h2>
 
-cart.forEach((item,index)=>{
+                <p>
+                    Área administrativa da AudioMax —
+                    acesso autorizado para ${NOME_DONO}.
+                </p>
 
-total += item.price;
+                <div class="owner-grid">
 
-const div =
-document.createElement("div");
+                    <div class="owner-card"
+                         onclick="painelFuncao('Dashboard')">
+                        <h3>📊 Dashboard</h3>
+                        <p>Visão geral da loja</p>
+                    </div>
 
-div.className="cart-item";
+                    <div class="owner-card"
+                         onclick="painelFuncao('Produtos')">
+                        <h3>🎧 Produtos</h3>
+                        <p>Gerenciar produtos</p>
+                    </div>
 
-div.innerHTML=`
+                    <div class="owner-card"
+                         onclick="painelFuncao('Pedidos')">
+                        <h3>📦 Pedidos</h3>
+                        <p>Ver e gerenciar pedidos</p>
+                    </div>
 
-<div>
-<b>${item.name}</b><br>
-R$ ${item.price.toFixed(2).replace(".",",")}
-</div>
+                    <div class="owner-card"
+                         onclick="painelFuncao('Clientes')">
+                        <h3>👥 Clientes</h3>
+                        <p>Gerenciar clientes</p>
+                    </div>
 
-<button class="remove" onclick="removeItem(${index})">
-Remover
-</button>
+                    <div class="owner-card"
+                         onclick="painelFuncao('Pagamentos')">
+                        <h3>💳 Pagamentos</h3>
+                        <p>Transações da loja</p>
+                    </div>
 
-`;
+                    <div class="owner-card"
+                         onclick="painelFuncao('Configurações')">
+                        <h3>⚙️ Configurações</h3>
+                        <p>Configurações da loja</p>
+                    </div>
 
-container.appendChild(div);
+                </div>
 
-});
+                <button
+                    class="close-panel"
+                    onclick="fecharPainel()">
+                    Sair do painel
+                </button>
 
-document.getElementById("cartTotal").innerText =
-total.toFixed(2).replace(".",",");
+            </div>
 
-}
+        </div>
+    `;
 
+    chat.appendChild(painel);
 
-function removeItem(index){
-
-cart.splice(index,1);
-
-updateCart();
-
-renderCart();
-
-}
-
-
-function openPayment(){
-
-if(cart.length===0){
-
-alert("Seu carrinho está vazio.");
-
-return;
-
-}
-
-closeCart();
-
-document.getElementById("paymentModal").style.display="flex";
-
-}
-
-
-function closePayment(){
-
-document.getElementById("paymentModal").style.display="none";
-
+    chat.scrollTop = chat.scrollHeight;
 }
 
 
-function choosePayment(method){
+/*
+==========================================
+FUNÇÕES DO PAINEL
+==========================================
+*/
 
-let total=0;
+function painelFuncao(funcao) {
 
-cart.forEach(item=>{
-total += item.price;
-});
-
-alert(
-"Forma escolhida: " + method +
-"\n\nTotal: R$ " +
-total.toFixed(2).replace(".",",") +
-"\n\nO próximo passo será o checkout de " +
-method + "."
-);
-
-closePayment();
-
+    adicionarMensagem(
+        "🛠️ Você abriu: <strong>" +
+        funcao +
+        "</strong>.<br><br>" +
+        "Essa função pode ser conectada ao sistema " +
+        "real da sua loja.",
+        "ai"
+    );
 }
 
 
-function filterProducts(category){
+/*
+==========================================
+FECHAR PAINEL
+==========================================
+*/
 
-const products =
-document.querySelectorAll(".product");
+function fecharPainel() {
 
-products.forEach(product=>{
+    painelAberto = false;
 
-if(
-category==="Todos" ||
-product.dataset.category===category
-){
-
-product.style.display="";
-
-}else{
-
-product.style.display="none";
-
-}
-
-});
-
+    adicionarMensagem(
+        "🔒 Você saiu do painel do dono.",
+        "ai"
+    );
 }
 
 
-function searchProducts(){
+/*
+==========================================
+NOVA CONVERSA
+==========================================
+*/
 
-const search =
-document.getElementById("searchInput")
-.value
-.toLowerCase();
+function novaConversa() {
 
-const products =
-document.querySelectorAll(".product");
+    const chat = document.getElementById("chat");
 
-products.forEach(product=>{
+    chat.innerHTML = `
+        <div class="message ai">
+            <div class="bubble">
+                👋 Nova conversa iniciada.<br><br>
+                Como posso ajudar?
+            </div>
+        </div>
+    `;
 
-const name =
-product.querySelector("h3")
-.innerText
-.toLowerCase();
-
-product.style.display =
-name.includes(search) ? "" : "none";
-
-});
-
+    esperandoSenha = false;
+    painelAberto = false;
 }
 
 
-function toggleAlice(){
+/*
+==========================================
+ENTER PARA ENVIAR
+==========================================
+*/
 
-const chat =
-document.getElementById("aliceChat");
+document
+    .getElementById("messageInput")
+    .addEventListener("keydown", function(event) {
 
-chat.style.display =
-chat.style.display==="block"
-? "none"
-: "block";
+        if (event.key === "Enter") {
+            enviarMensagem();
+        }
 
-}
-
-
-function sendAlice(){
-
-const input =
-document.getElementById("aliceInput");
-
-const question =
-input.value.trim();
-
-if(!question) return;
-
-const body =
-document.getElementById("chatBody");
-
-const user =
-document.createElement("div");
-
-user.className="message user";
-
-user.innerText=question;
-
-body.appendChild(user);
-
-input.value="";
-
-const q=question.toLowerCase();
-
-let response =
-"Posso ajudar com produtos, preços, carrinho, Pix, cartão ou Bitcoin. 😊";
-
-
-if(q.includes("pix")){
-
-response =
-"O Pix é uma das opções de pagamento disponíveis no checkout.";
-
-}
-
-else if(q.includes("cartão") || q.includes("cartao")){
-
-response =
-"Você pode escolher cartão na etapa de pagamento.";
-
-}
-
-else if(q.includes("bitcoin")){
-
-response =
-"Bitcoin também aparece como opção de pagamento.";
-
-}
-
-else if(q.includes("air pro")){
-
-response =
-"O AudioMax Air Pro está por R$ 224,90.";
-
-}
-
-else if(q.includes("gamer")){
-
-response =
-"O AudioMax Gamer X está por R$ 244,90.";
-
-}
-
-else if(q.includes("mini")){
-
-response =
-"O AudioMax Mini Buds está por R$ 139,90.";
-
-}
-
-else if(
-q.includes("oi") ||
-q.includes("olá") ||
-q.includes("ola")
-){
-
-response =
-"Olá! 👋 Eu sou a Alice. Como posso ajudar?";
-
-}
-
-
-setTimeout(()=>{
-
-const answer =
-document.createElement("div");
-
-answer.className="message alice";
-
-answer.innerText=response;
-
-body.appendChild(answer);
-
-body.scrollTop=body.scrollHeight;
-
-},400);
-
-}
+    });
 
 </script>
 
 </body>
-                    </html>
+</html>
