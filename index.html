@@ -1,11 +1,10 @@
-
-import requests
+import urllib2
 
 # Conecte-se ao banco de dados
-db = requests.get('https://example.com/wp-json/wp/v2/posts')
+db = urllib2.urlopen('https://example.com/wp-json/wp/v2/posts')
 
 # Obtenha todos os posts
-posts = db.json()
+posts = db.read()
 
 # Imprima todos os posts
 for post in posts:
