@@ -1,12 +1,551 @@
-import urllib2
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Super Mario (Mobile Canvas Demo)</title>
+<style>
+  /* GLOBAL RESET */
+  html,body { height:100%; margin:0; background:#000; -webkit-user-select:none; -ms-user-select:none; user-select:none; touch-action: none; }
+  canvas { display:block; background:#87CEEB; image-rendering: pixelated; -webkit-tap-highlight-color: transparent; }
+  /* Touch buttons (DOM overlays) */
+  .controls { position:fixed; left:0; top:0; width:100%; height:100%; pointer-events:none; }
+  .leftGroup, .rightGroup { position: absolute; bottom: 24px; pointer-events:auto; }
+  .leftGroup { left: 18px; display:flex; gap:12px; align-items:center; }
+  .rightGroup { right: 18px; display:flex; gap:12px; align-items:center; }
+  .btn {
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:bold; font-family:sans-serif;
+    border-radius:50%; box-shadow:0 4px 8px rgba(0,0,0,0.25);
+    user-select:none; -webkit-user-select:none; -ms-user-select:none;
+    -webkit-touch-callout:none;
+    border: 2px solid rgba(255,255,255,0.12);
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-small { width:70px; height:70px; font-size:24px; background:rgba(0,0,0,0.4); }
+  .btn-mid { width:80px; height:80px; font-size:28px; background:rgba(0,0,0,0.4); }
+  .btn-large { width:90px; height:90px; font-size:28px; }
+  /* A (jump) green/blue gradient */
+  .btn-a { background: linear-gradient(180deg,#2be7b4,#1e9fe6); color:#041018; }
+  /* B (run/shoot) red */
+  .btn-b { background: linear-gradient(180deg,#ff6b6b,#c63737); color:#fff; }
+  /* Left/Right styling */
+  .btn-lr { background: rgba(0,0,0,0.4); color:#fff; width:80px; height:80px; font-size:30px; }
+  /* HUD and overlays */
+  .overlay {
+    position:fixed; left:0; top:0; width:100%; pointer-events:none; font-family:monospace;
+  }
+  .rotateHint {
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.9); color:#fff; font-size:20px; z-index:9999; text-align:center;
+    padding:20px; box-sizing:border-box;
+  }
+  /* Game Over button */
+  .gameover-btn {
+    position: absolute; left:50%; top:60%; transform: translate(-50%,-50%);
+    pointer-events:auto; width:240px; height:80px; border-radius:12px;
+    background:linear-gradient(180deg,#ffb84d,#ff7a00); font-size:22px; color:#2b1b00;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  }
+  /* pixel text style fallback */
+  .hudText { font-family: monospace; font-weight:700; color:#fff; text-shadow:2px 2px 0 rgba(0,0,0,0.6); pointer-events:none; }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
 
-# Conecte-se ao banco de dados
-db = urllib2.urlopen('https://example.com/wp-json/wp/v2/posts')
+<!-- Touch controls overlay (large, clear buttons) -->
+<div class="controls" id="controls">
+  <div class="leftGroup" style="z-index:50;">
+    <div id="btnLeft" class="btn btn-lr">◀</div>
+    <div id="btnRight" class="btn btn-lr">▶</div>
+  </div>
+  <div class="rightGroup" style="z-index:50;">
+    <div id="btnA" class="btn btn-large btn-a">A</div>
+    <div id="btnB" class="btn btn-small btn-b">B</div>
+  </div>
+</div>
 
-# Obtenha todos os posts
-posts = db.read()
+<!-- HUD overlay for text (we draw HUD on canvas, but keep area for Game Over button) -->
+<div id="overlays" class="overlay"></div>
 
-# Imprima todos os posts
-for post in posts:
-    print(post['title']['rendered'])
-    print(post['content']['rendered'])
+<!-- Rotate hint -->
+<div id="rotateHint" class="rotateHint" style="display:none;">
+  Rode seu aparelho para o modo paisagem (landscape) para jogar.
+</div>
+
+<script>
+/*
+  Super Mario - Single-file HTML Mobile Canvas Game
+  - Render via Canvas 2D
+  - Touch controls with multitouch
+  - Physics with AABB separation
+  - Simplified but feature-rich implementation per user's spec
+  - Author: ChatGPT (engineer-style compact single-file)
+*/
+
+/* ---------------------------
+   CONFIG / CONSTANTS
+   --------------------------- */
+const TILE = 32; // base tile size (pixels) - we'll scale drawing to display
+const GRAVITY = 0.6; // per spec
+const FPS = 60;
+const MS_PER_FRAME = 1000 / FPS;
+const MAX_JUMP_HOLD = 14; // frames jump can be held to increase height
+
+/* ---------------------------
+   CANVAS & RESIZE
+   --------------------------- */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let DPR = Math.max(1, window.devicePixelRatio || 1);
+
+// Resize to fill window and enforce landscape orientation; show rotate hint if portrait
+const rotateHint = document.getElementById('rotateHint');
+function resize() {
+  // use innerWidth/innerHeight as requested
+  let w = window.innerWidth;
+  let h = window.innerHeight;
+  // If portrait, show hint overlay but still size canvas
+  if (h > w) {
+    rotateHint.style.display = 'flex';
+  } else {
+    rotateHint.style.display = 'none';
+  }
+  canvas.width = Math.floor(w * DPR);
+  canvas.height = Math.floor(h * DPR);
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  // pixelated look
+  ctx.imageSmoothingEnabled = false;
+}
+window.addEventListener('resize', () => { DPR = Math.max(1, window.devicePixelRatio || 1); resize(); });
+resize();
+
+/* ---------------------------
+   AUDIO (WebAudio simple synths)
+   --------------------------- */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    audioCtx = new AudioCtx();
+  }
+}
+function beep(type = 'sine', freq = 440, time = 0.08, vol = 0.08) {
+  ensureAudio();
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+  g.gain.value = vol;
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  o.start();
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + time);
+  o.stop(audioCtx.currentTime + time + 0.02);
+}
+// Defined sound wrappers per spec
+function sfxJump(){ beep('sine', 880, 0.09, 0.09); }
+function sfxCoin(){ beep('square', 1200, 0.12, 0.09); }
+function sfxPowerup(){ beep('sawtooth', 440, 0.3, 0.12); }
+function sfxDeath(){ beep('sine', 120, 0.6, 0.18); }
+function sfxBlock(){ beep('square', 520, 0.12, 0.08); }
+
+/* ---------------------------
+   INPUT (Touch multi-touch)
+   --------------------------- */
+const input = {
+  left:false, right:false, jump:false, run:false
+};
+const touchMap = new Map(); // track touch identifiers per button
+
+// Hook up DOM buttons to touch events with multi-touch handling
+function bindButton(id, action) {
+  const el = document.getElementById(id);
+  // Prevent the default behavior to avoid scrolling
+  ['touchstart','touchmove','touchend','touchcancel'].forEach(ev=>{
+    el.addEventListener(ev, e=>e.preventDefault(), {passive:false});
+  });
+  el.addEventListener('touchstart', (e)=>{
+    for (let t of e.changedTouches) {
+      touchMap.set(t.identifier, action);
+      updateInputFromTouches();
+    }
+  }, {passive:false});
+  el.addEventListener('touchend', (e)=>{
+    for (let t of e.changedTouches) {
+      touchMap.delete(t.identifier);
+      updateInputFromTouches();
+    }
+  }, {passive:false});
+  el.addEventListener('touchcancel', (e)=>{
+    for (let t of e.changedTouches) {
+      touchMap.delete(t.identifier);
+      updateInputFromTouches();
+    }
+  }, {passive:false});
+  // Also handle mouse for desktop test convenience (not primary)
+  el.addEventListener('mousedown', (e)=>{ touchMap.set('mouse-'+id, action); updateInputFromTouches(); e.preventDefault(); });
+  window.addEventListener('mouseup', (e)=>{ touchMap.delete('mouse-'+id); updateInputFromTouches(); });
+}
+bindButton('btnLeft','left');
+bindButton('btnRight','right');
+bindButton('btnA','jump');
+bindButton('btnB','run');
+
+// Update global input flags based on active touches
+function updateInputFromTouches() {
+  input.left = input.right = input.jump = input.run = false;
+  for (const action of touchMap.values()) {
+    if (action === 'left') input.left = true;
+    if (action === 'right') input.right = true;
+    if (action === 'jump') input.jump = true;
+    if (action === 'run') input.run = true;
+  }
+}
+
+/* ---------------------------
+   UTILS
+   --------------------------- */
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function rectsOverlap(a,b){
+  return !(a.x + a.w <= b.x || a.x >= b.x + b.w || a.y + a.h <= b.y || a.y >= b.y + b.h);
+}
+
+/* ---------------------------
+   GAME ENTITIES & MAP
+   --------------------------- */
+
+// Basic tile map (2D array). 0=empty,1=ground,2=question,3=brick,4=coin,5=pipe-top,6=pipe-body,7=flagpole
+// We'll generate a level procedurally with some gaps, pipes, blocks.
+class TileMap {
+  constructor(cols, rows) {
+    this.cols = cols;
+    this.rows = rows;
+    this.tiles = Array.from({length: rows}, ()=> new Array(cols).fill(0));
+    this.tileSize = TILE;
+    this.init();
+  }
+  init() {
+    // fill sky
+    for (let r=0;r<this.rows;r++) for (let c=0;c<this.cols;c++) this.tiles[r][c]=0;
+    const groundRow = this.rows-2;
+    // ground continuous with some holes
+    for (let c=0;c<this.cols;c++){
+      if (c>8 && Math.random()<0.05) { // hole: leave empty next 2-3 tiles
+        const holeSize = 2 + Math.floor(Math.random()*2);
+        for (let h=0; h<holeSize && c<this.cols; h++){ this.tiles[groundRow][c]=0; c++; }
+        c--;
+        continue;
+      }
+      this.tiles[groundRow][c] = 1; // ground tile
+      // make a few upper blocks
+      if (Math.random() < 0.09 && c>4 && c< this.cols-10) {
+        this.tiles[groundRow-3][c] = Math.random() < 0.6 ? 2 : 3; // question or brick
+      }
+      // pipes
+      if (Math.random() < 0.03 && c>6) {
+        const height = 2 + Math.floor(Math.random()*2);
+        this.tiles[groundRow-height][c] = 5; // pipe top
+        for (let hh=1; hh<height; hh++) this.tiles[groundRow-height+hh][c] = 6;
+        c += 2; // space after pipe
+      }
+      // flagpole near end
+      if (c === this.cols - 12) {
+        this.tiles[groundRow-4][c] = 7;
+      }
+    }
+    // Place some coins floating in a pattern
+    for (let c=10;c<this.cols-6;c+=10) {
+      if (Math.random()<0.7) {
+        this.tiles[groundRow-4][c] = 4;
+      }
+    }
+    // make sure starting area safe
+    for (let c=0;c<12;c++) {
+      for (let r=0;r<this.rows;r++) {
+        if (r>=groundRow) this.tiles[r][c] = (r===groundRow?1:0);
+        if (c===6 && r>=groundRow-1) { this.tiles[r][c]=1; } // ensure a small platform
+      }
+    }
+    // ensure at least one question block near start that gives mushroom
+    this.firstSpecialGiven = false;
+    for (let c=8;c<16;c++){
+      if (this.tiles[groundRow-3][c] === 2) { this.specialPos = {r:groundRow-3, c}; break; }
+    }
+  }
+  tileAt(col,row){
+    if (row<0 || row>=this.rows || col<0 || col>=this.cols) return 0;
+    return this.tiles[row][col];
+  }
+  setTile(col,row, val){
+    if (row<0 || row>=this.rows || col<0 || col>=this.cols) return;
+    this.tiles[row][col] = val;
+  }
+}
+
+/* ---------------------------
+   PARTICLES
+   --------------------------- */
+class Particle {
+  constructor(x,y,size, color, vx, vy, life) {
+    this.x=x; this.y=y; this.w=size; this.h=size;
+    this.vx=vx; this.vy=vy; this.color=color; this.life=life; this.maxLife=life;
+  }
+  update(dt) {
+    this.vy += GRAVITY * 0.18;
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.life -= dt;
+  }
+  draw(cx, camera) {
+    const px = Math.round((this.x - camera.x)*camera.scale);
+    const py = Math.round((this.y - camera.y)*camera.scale);
+    cx.globalAlpha = clamp(this.life/this.maxLife, 0,1);
+    cx.fillStyle = this.color;
+    cx.fillRect(px, py, Math.max(1, Math.round(this.w*camera.scale)), Math.max(1, Math.round(this.h*camera.scale)));
+    cx.globalAlpha = 1;
+  }
+}
+
+/* ---------------------------
+   ENEMIES
+   --------------------------- */
+class Enemy {
+  constructor(x,y) {
+    this.x=x; this.y=y; this.w=28; this.h=28;
+    this.vx = -0.5; this.vy=0; this.alive=true; this.onGround=false;
+    this.type='goomba';
+    this.flip=false; // used for drawing
+  }
+  update(dt, map, player) {
+    if (!this.alive) return;
+    // simple gravity
+    this.vy += GRAVITY * 0.9;
+    // patrol
+    this.x += this.vx * dt;
+    // collisions with map
+    // Horizontal collision: if tile ahead is solid at feet, continue; else reverse.
+    const aheadX = this.vx < 0 ? this.x - 8 : this.x + this.w + 8;
+    const footY = this.y + this.h - 4;
+    const col = Math.floor(aheadX / TILE);
+    const row = Math.floor(footY / TILE);
+    if (map.tileAt(col,row) === 0) {
+      this.vx *= -1;
+    }
+    // vertical
+    this.y += this.vy * dt;
+    // ground collision (naive)
+    const leftCol = Math.floor(this.x / TILE);
+    const rightCol = Math.floor((this.x + this.w -1)/TILE);
+    const belowRow = Math.floor((this.y + this.h) / TILE);
+    if (map.tileAt(leftCol, belowRow) || map.tileAt(rightCol, belowRow)) {
+      // place on top
+      this.y = belowRow * TILE - this.h - 0.01;
+      this.vy = 0;
+      this.onGround = true;
+    } else this.onGround = false;
+  }
+  draw(cx, camera) {
+    if (!this.alive) return;
+    const sx = Math.round((this.x - camera.x)*camera.scale);
+    const sy = Math.round((this.y - camera.y)*camera.scale);
+    const s = Math.round(this.w*camera.scale);
+    // simple goomba look: brown dome + eyes
+    cx.save();
+    cx.translate(sx, sy);
+    // body
+    cx.fillStyle = "#A65A2A";
+    cx.fillRect(0, Math.round(s*0.15), s, Math.round(s*0.7));
+    // feet
+    cx.fillStyle="#422210";
+    cx.fillRect(0, Math.round(s*0.8), Math.round(s*0.45), Math.round(s*0.2));
+    cx.fillRect(Math.round(s*0.55), Math.round(s*0.8), Math.round(s*0.45), Math.round(s*0.2));
+    // eyes
+    cx.fillStyle="#fff";
+    cx.fillRect(Math.round(s*0.28), Math.round(s*0.28), Math.max(2,Math.round(s*0.12)), Math.max(2,Math.round(s*0.12)));
+    cx.fillRect(Math.round(s*0.58), Math.round(s*0.28), Math.max(2,Math.round(s*0.12)), Math.max(2,Math.round(s*0.12)));
+    cx.fillStyle="#000";
+    cx.fillRect(Math.round(s*0.3), Math.round(s*0.3), Math.max(1,Math.round(s*0.05)), Math.max(1,Math.round(s*0.05)));
+    cx.fillRect(Math.round(s*0.6), Math.round(s*0.3), Math.max(1,Math.round(s*0.05)), Math.max(1,Math.round(s*0.05)));
+    cx.restore();
+  }
+}
+
+/* ---------------------------
+   PLAYER (Mario)
+   --------------------------- */
+class Player {
+  constructor(x,y) {
+    this.x = x; this.y = y;
+    this.w = 28; this.h = 32;
+    this.vx = 0; this.vy = 0;
+    this.onGround = false;
+    this.facing = 1; // 1 right, -1 left
+    this.running = false;
+    this.big = false; // small/big Mario
+    this.canShoot = false;
+    this.lives = 3;
+    this.score = 0;
+    this.coins = 0;
+    this.world = '1-1';
+    this.time = 400;
+    this.jumpHold = 0;
+    this.dead = false;
+    this.respawnTimer = 0;
+    this.animFrame = 0;
+    this.animTimer = 0;
+  }
+  get bounds(){ return {x:this.x, y:this.y, w:this.w, h:this.h}; }
+  update(dt, map, input, enemies, particles) {
+    if (this.dead) {
+      this.vy += GRAVITY;
+      this.y += this.vy * dt;
+      return;
+    }
+    // Horizontal movement: acceleration + friction
+    const accel = input.run ? 0.46 : 0.28;
+    const maxSpeed = input.run ? 6.0 : 3.8;
+    if (input.left) {
+      this.vx -= accel;
+      this.facing = -1;
+    } else if (input.right) {
+      this.vx += accel;
+      this.facing = 1;
+    } else {
+      // apply friction
+      this.vx *= 0.82;
+      if (Math.abs(this.vx) < 0.05) this.vx = 0;
+    }
+    this.vx = clamp(this.vx, -maxSpeed, maxSpeed);
+    // Jump: variable jump height while hold
+    if (input.jump) {
+      if (this.onGround && this.jumpHold === 0) {
+        // start jump
+        this.vy = -10.8; // initial impulse
+        this.jumpHold = 1;
+        this.onGround = false;
+        sfxJump();
+      } else if (this.jumpHold >0 && this.jumpHold < MAX_JUMP_HOLD) {
+        // keep applying small upward while held
+        this.vy -= 0.42;
+        this.jumpHold++;
+      }
+    } else {
+      this.jumpHold = 0;
+    }
+
+    // Apply gravity
+    this.vy += GRAVITY;
+    // Apply velocity and collisions (AABB separate axis)
+    // Horizontal move
+    this.x += this.vx * dt;
+    // collide with tiles horizontally
+    this.handleCollisions(map, 'x', particles);
+    // Vertical move
+    this.y += this.vy * dt;
+    // collide vertical
+    this.handleCollisions(map, 'y', particles);
+
+    // Enemy collisions
+    for (const e of enemies) {
+      if (!e.alive) continue;
+      const pbox = {x:this.x, y:this.y, w:this.w, h:this.h};
+      const ebox = {x:e.x, y:e.y, w:e.w, h:e.h};
+      if (rectsOverlap(pbox, ebox)) {
+        // if hitting from above
+        if (this.vy > 0 && (this.y + this.h - e.y) < 18) {
+          // stomp
+          e.alive = false;
+          this.vy = -8;
+          this.score += 100;
+          sfxCoin();
+          // small particles
+          for (let i=0;i<6;i++){
+            particles.push(new Particle(e.x + e.w/2, e.y + e.h/2, 4, '#FFD700', (Math.random()-0.5)*3, -3 - Math.random()*2, 40));
+          }
+        } else {
+          // side hit -> die (unless in invulnerable state; not implemented)
+          this.die();
+        }
+      }
+    }
+
+    // animation timer
+    this.animTimer++;
+    if (Math.abs(this.vx) > 0.6 && this.onGround) {
+      if (this.animTimer % 6 === 0) this.animFrame = (this.animFrame + 1) % 4;
+    } else {
+      this.animFrame = 0;
+      this.animTimer = 0;
+    }
+
+    // world time decrement
+    if (Math.floor(performance.now()/1000) % 1 === 0) {
+      // handled in game loop for consistency
+    }
+  }
+
+  handleCollisions(map, axis, particles) {
+    if (axis === 'x') {
+      const left = Math.floor(this.x / TILE);
+      const right = Math.floor((this.x + this.w - 1) / TILE);
+      const top = Math.floor(this.y / TILE);
+      const bottom = Math.floor((this.y + this.h - 1) / TILE);
+      // check multiple tiles overlapped horizontally
+      for (let r = top; r <= bottom; r++) {
+        for (let c = left; c <= right; c++) {
+          const t = map.tileAt(c,r);
+          if (!t) continue;
+          if (t === 5 || t === 6 || t === 1) { // solid
+            if (this.vx > 0) {
+              this.x = c * TILE - this.w - 0.01;
+            } else if (this.vx < 0) {
+              this.x = (c+1) * TILE + 0.01;
+            }
+            this.vx = 0;
+          }
+        }
+      }
+    } else if (axis === 'y') {
+      const left = Math.floor(this.x / TILE);
+      const right = Math.floor((this.x + this.w -1) / TILE);
+      const top = Math.floor(this.y / TILE);
+      const bottom = Math.floor((this.y + this.h -1) / TILE);
+      this.onGround = false;
+      for (let c = left; c <= right; c++) {
+        for (let r = top; r <= bottom; r++) {
+          const t = map.tileAt(c,r);
+          if (!t) continue;
+          if (t === 1 || t === 5 || t === 6) { // solid ground/pipe
+            if (this.vy > 0) {
+              // landing on top
+              this.y = r * TILE - this.h - 0.01;
+              this.vy = 0;
+              this.onGround = true;
+            } else if (this.vy < 0) {
+              // hitting from below
+              this.y = (r+1) * TILE + 0.01;
+              this.vy = 0;
+              // if it's a block that can be hit, trigger block behavior
+              if (t === 2 || t === 3) {
+                // bump animation: push block up and back down
+                this.bumpBlock(c,r,map,particles);
+              }
+            }
+          } else if (t === 2) { // question (floating) - should be triggered only on bump
+            // handled above
+          } else if (t === 4) { // coin tile - collect if touch
+            map.setTile(c,r,0);
+            this.coins++;
+            this.score += 200;
+            sfxCoin();
+            // coin particles (stars)
+            particles.push(new Particle(c*TILE + TILE/2, r*TILE + TILE/2, 6, '#FFD700', 0, -2.6, 50));
+            // stars rising
+            for (let i=0;i<6;i++){
+              particles.push(new Particle(c*TILE + TILE/2, r*TILE + TILE/2, 3, '#FFFF88', (Math.random()-0.5)*1.2, -2 - Math.random()*1.4, 40));
+            }
+          } else if (t === 7) { // flagpole (finish)
+            // do nothing here; flag detection handled in Game update by positi
