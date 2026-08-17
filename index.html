@@ -1,551 +1,386 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>Super Mario (Mobile Canvas Demo)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Política de segurança de conteúdo: só permite carregar recursos do próprio site
+     e das fontes do Google, bloqueando scripts/estilos/objetos de qualquer outra origem -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src https://fonts.gstatic.com;
+  img-src 'self' data:;
+  script-src 'self' 'sha256-KrwZOkjnK0dSXnVzBivBPrh/xAwLY0m8FxXjk/hBHsg=';
+  connect-src 'self';
+  frame-ancestors 'none';
+  base-uri 'self';
+  form-action 'self';
+  object-src 'none';
+  upgrade-insecure-requests;
+">
+<!-- Evita que o site seja carregado dentro de um iframe de outro domínio (clickjacking) -->
+<meta http-equiv="X-Frame-Options" content="DENY">
+<!-- Não envia a URL completa como referrer para sites de terceiros -->
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Pedaço da Pizza — Campo Grande, MS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Fraunces:ital,opsz,wght@1,9..144,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  /* GLOBAL RESET */
-  html,body { height:100%; margin:0; background:#000; -webkit-user-select:none; -ms-user-select:none; user-select:none; touch-action: none; }
-  canvas { display:block; background:#87CEEB; image-rendering: pixelated; -webkit-tap-highlight-color: transparent; }
-  /* Touch buttons (DOM overlays) */
-  .controls { position:fixed; left:0; top:0; width:100%; height:100%; pointer-events:none; }
-  .leftGroup, .rightGroup { position: absolute; bottom: 24px; pointer-events:auto; }
-  .leftGroup { left: 18px; display:flex; gap:12px; align-items:center; }
-  .rightGroup { right: 18px; display:flex; gap:12px; align-items:center; }
-  .btn {
+  :root{
+    --char:#180F0A;
+    --char-2:#221610;
+    --char-3:#2B1B13;
+    --ember:#E24C1F;
+    --ember-soft:#F0834A;
+    --ember-deep:#B93414;
+    --wheat:#E7B84B;
+    --olive:#7C8752;
+    --cream:#F4EBDB;
+    --cream-dim:#BFAF98;
+    --cream-faint:#8E8070;
+    --line: rgba(244,235,219,0.12);
+    --line-strong: rgba(244,235,219,0.22);
+    --radius: 4px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+      radial-gradient(ellipse 900px 500px at 15% -5%, rgba(226,76,31,0.10), transparent 60%),
+      var(--char);
+    color:var(--cream);
+    font-family:'Work Sans', sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    font-size:16px;
+  }
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 32px;}
+  h1,h2,h3{font-family:'Fraunces', serif; font-weight:700; letter-spacing:-0.015em; color:var(--cream);}
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--ember-soft);
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:''; width:16px; height:1px; background:var(--ember-soft); display:inline-block;}
+  :focus-visible{outline:2px solid var(--wheat); outline-offset:3px;}
+  svg{display:block;}
+
+  /* ---------- divider ---------- */
+  .cutline{
+    height:1px; width:100%;
+    background-image: radial-gradient(circle, var(--line-strong) 1.4px, transparent 1.4px);
+    background-size: 14px 1px;
+    background-repeat: repeat-x;
+    background-position: center;
+  }
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky; top:0; z-index:60;
+    background:rgba(24,15,10,0.82);
+    backdrop-filter:blur(10px) saturate(1.2);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 32px; max-width:1120px; margin:0 auto;
+  }
+  .brand{
+    font-family:'Fraunces', serif; font-weight:700; font-size:19px;
+    display:flex; align-items:center; gap:11px; letter-spacing:-0.01em;
+  }
+  .brand .mark{width:26px; height:26px; flex-shrink:0;}
+  nav.links{display:flex; gap:34px; font-size:13.5px; color:var(--cream-dim);}
+  nav.links a{position:relative; padding-bottom:3px;}
+  nav.links a::after{
+    content:''; position:absolute; left:0; bottom:0; width:0; height:1px; background:var(--wheat);
+    transition:width .25s ease;
+  }
+  nav.links a:hover{color:var(--cream);}
+  nav.links a:hover::after{width:100%;}
+  .btn-nav{
+    font-family:'JetBrains Mono', monospace; font-size:11.5px;
+    border:1px solid var(--ember); color:var(--ember-soft);
+    padding:9px 18px; border-radius:var(--radius);
+    transition:background .2s, color .2s;
+    display:flex; align-items:center; gap:8px;
+  }
+  .btn-nav:hover{background:var(--ember); color:var(--char);}
+  .burger{display:none; width:34px; height:34px; border:1px solid var(--line); border-radius:4px; align-items:center; justify-content:center; background:transparent;}
+  .burger span, .burger span::before, .burger span::after{content:''; display:block; width:15px; height:1.5px; background:var(--cream); position:relative;}
+  .burger span::before{position:absolute; top:-5px;} .burger span::after{position:absolute; top:5px;}
+  @media (max-width:780px){
+    nav.links{display:none;}
+    .burger{display:flex;}
+  }
+
+  /* ---------- MARQUEE STRIP ---------- */
+  .strip{
+    border-bottom:1px solid var(--line);
+    background:var(--char-2);
+    overflow:hidden;
+    white-space:nowrap;
+  }
+  .strip-track{
+    display:inline-flex; gap:0; animation:scroll 32s linear infinite;
+  }
+  .strip:hover .strip-track{animation-play-state:paused;}
+  .strip-item{
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--cream-faint);
+    padding:11px 28px; border-right:1px solid var(--line); white-space:nowrap;
+  }
+  .strip-item b{color:var(--ember-soft); font-weight:500;}
+  @keyframes scroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  @media (prefers-reduced-motion: reduce){ .strip-track{animation:none;} }
+
+  /* ---------- HERO ---------- */
+  .hero{ position:relative; padding:88px 0 64px; overflow:hidden; }
+  .hero::before{
+    content:'';
+    position:absolute; top:-120px; right:-160px; width:560px; height:560px; border-radius:50%;
+    background:radial-gradient(circle, rgba(226,76,31,0.22), transparent 68%);
+    pointer-events:none;
+  }
+  .hero-grid{ position:relative; display:grid; grid-template-columns:1.2fr 0.8fr; gap:60px; align-items:center; }
+  @media (max-width:900px){ .hero-grid{grid-template-columns:1fr;} }
+
+  .status-pill{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:'JetBrains Mono', monospace; font-size:12px;
+    background:rgba(124,135,82,0.14); border:1px solid rgba(124,135,82,0.55);
+    color:#CBD6A0; padding:8px 16px 8px 12px; border-radius:20px; margin-bottom:26px;
+  }
+  .status-pill .pulse{
+    width:7px;height:7px;border-radius:50%;background:#A7C859;
+    box-shadow:0 0 0 0 rgba(167,200,89,0.6); animation:pulse 2.2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(167,200,89,0.55);}
+    70%{box-shadow:0 0 0 9px rgba(167,200,89,0);}
+    100%{box-shadow:0 0 0 0 rgba(167,200,89,0);}
+  }
+  h1.title{
+    font-size:clamp(42px, 5.6vw, 76px);
+    line-height:0.96; font-weight:900;
+  }
+  h1.title .line2{
+    font-style:italic; font-weight:500; color:var(--ember-soft);
+    font-size:0.62em; display:block; margin-top:0.12em;
+  }
+  .subtitle{ margin-top:24px; font-size:17.5px; color:var(--cream-dim); max-width:44ch; }
+  .hero-meta{ display:flex; flex-wrap:wrap; gap:0; margin-top:32px; border-top:1px solid var(--line); }
+  .hm-item{ padding:16px 26px 16px 0; margin-right:26px; border-right:1px solid var(--line); }
+  .hm-item:last-child{border-right:none;}
+  .hm-item .k{font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--cream-faint); margin-bottom:6px;}
+  .hm-item .v{font-family:'Fraunces', serif; font-size:19px; color:var(--wheat); font-weight:600;}
+  .cta-row{display:flex; flex-wrap:wrap; gap:12px; margin-top:34px;}
+  .btn{
+    padding:14px 24px; border-radius:var(--radius); font-size:13.5px; font-weight:600;
+    display:inline-flex; align-items:center; gap:9px; transition:transform .15s, background .2s, color .2s, border-color .2s;
+    letter-spacing:.01em;
+  }
+  .btn svg{width:16px; height:16px;}
+  .btn-primary{background:var(--ember); color:#1B120D;}
+  .btn-primary:hover{background:var(--ember-soft); transform:translateY(-2px);}
+  .btn-ghost{border:1px solid var(--line-strong); color:var(--cream);}
+  .btn-ghost:hover{border-color:var(--wheat); color:var(--wheat); transform:translateY(-2px);}
+
+  /* pizza-wheel gauge, the signature element */
+  .gauge-card{
+    background:var(--char-2); border:1px solid var(--line); border-radius:8px;
+    padding:30px; position:relative; box-shadow:0 30px 60px -30px rgba(0,0,0,0.6);
+  }
+  .gauge-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .gauge-top .label{font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--cream-faint);}
+  .wheel-wrap{display:flex; justify-content:center; padding:18px 0 6px;}
+  .wheel-center-label{font-family:'Fraunces', serif; font-size:15px; color:var(--cream); font-weight:600; text-align:center; margin-top:2px;}
+  .wheel-center-sub{font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--cream-faint); text-align:center; margin-top:3px;}
+  .gauge-stats{display:flex; gap:0; margin-top:22px; padding-top:20px; border-top:1px solid var(--line);}
+  .gauge-stat{flex:1;}
+  .gauge-stat + .gauge-stat{border-left:1px solid var(--line); padding-left:18px;}
+  .gauge-stat .num{font-family:'Fraunces', serif; font-size:21px; color:var(--cream); font-weight:600;}
+  .gauge-stat .cap{font-size:11px; color:var(--cream-faint); font-family:'JetBrains Mono', monospace; margin-top:3px;}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:84px 0;}
+  .section-head{margin-bottom:44px; max-width:60ch;}
+  .section-head h2{font-size:clamp(30px,3.6vw,40px); margin-top:14px;}
+
+  /* amenities */
+  .amenity-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:hidden;
+  }
+  @media (max-width:720px){ .amenity-grid{grid-template-columns:1fr;} }
+  .amenity{background:var(--char-2); padding:32px 26px; transition:background .25s;}
+  .amenity:hover{background:var(--char-3);}
+  .amenity .glyph{width:30px; height:30px; color:var(--ember-soft); margin-bottom:18px;}
+  .amenity h3{font-size:17px; margin-bottom:8px;}
+  .amenity p{font-size:13.5px; color:var(--cream-dim);}
+
+  /* offer banner */
+  .offer{
+    margin-top:1px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;
+    background:linear-gradient(120deg, rgba(226,76,31,0.16), rgba(231,184,75,0.07));
+    border:1px solid rgba(226,76,31,0.32); border-top:none;
+    padding:28px 32px; border-radius:0 0 8px 8px;
+  }
+  .offer .tag{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--ember-soft); letter-spacing:.1em; text-transform:uppercase;}
+  .offer h3{font-size:23px; margin-top:8px; font-weight:600;}
+
+  /* menu teaser */
+  .menu-section{background:var(--char-2); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .menu-cols{display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid var(--line); border-radius:8px; overflow:hidden;}
+  @media (max-width:720px){ .menu-cols{grid-template-columns:1fr;} }
+  .menu-col{padding:38px 34px; background:var(--char); position:relative;}
+  .menu-col + .menu-col{border-left:1px solid var(--line);}
+  @media (max-width:720px){ .menu-col + .menu-col{border-left:none; border-top:1px solid var(--line);} }
+  .menu-col .num{position:absolute; top:28px; right:32px; font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--cream-faint);}
+  .menu-col h3{font-size:25px; margin:10px 0 14px;}
+  .menu-col p{color:var(--cream-dim); font-size:14px; margin-bottom:22px; max-width:34ch;}
+  .price-tag{font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--wheat); border:1px solid rgba(231,184,75,0.4); padding:7px 14px; border-radius:20px; display:inline-block;}
+
+  /* reviews */
+  .review-panel{
+    display:grid; grid-template-columns:auto 1fr; gap:48px; align-items:center;
+    background:var(--char-2); border:1px solid var(--line); border-radius:8px; padding:40px;
+  }
+  @media (max-width:640px){ .review-panel{grid-template-columns:1fr; text-align:center;} }
+  .rating-block{text-align:center; padding-right:40px; border-right:1px solid var(--line);}
+  @media (max-width:640px){ .rating-block{border-right:none; padding-right:0; padding-bottom:24px; border-bottom:1px solid var(--line);} }
+  .rating-block .big{font-family:'Fraunces', serif; font-size:68px; font-weight:700; color:var(--wheat); line-height:1;}
+  .stars{color:var(--wheat); margin-top:10px; display:flex; gap:3px; justify-content:center;}
+  .stars svg{width:15px; height:15px;}
+  .rating-block .count{font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--cream-faint); margin-top:8px;}
+  .review-copy p{color:var(--cream-dim); font-size:15px; margin-bottom:20px; max-width:52ch;}
+
+  /* location / footer */
+  .loc-grid{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:start;}
+  @media (max-width:800px){ .loc-grid{grid-template-columns:1fr;} }
+  .info-list{list-style:none; margin-top:24px;}
+  .info-list li{
+    display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--line);
+    font-size:14.5px; color:var(--cream-dim); align-items:baseline;
+  }
+  .info-list li span.k{font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--ember-soft); width:84px; flex-shrink:0; text-transform:uppercase; letter-spacing:.06em;}
+  .info-list li a:hover{color:var(--wheat);}
+  .map-frame{
+    border:1px solid var(--line); border-radius:8px; aspect-ratio:4/3;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(226,76,31,0.14), transparent 55%),
+      var(--char-2);
     display:flex; align-items:center; justify-content:center;
-    color:#fff; font-weight:bold; font-family:sans-serif;
-    border-radius:50%; box-shadow:0 4px 8px rgba(0,0,0,0.25);
-    user-select:none; -webkit-user-select:none; -ms-user-select:none;
-    -webkit-touch-callout:none;
-    border: 2px solid rgba(255,255,255,0.12);
+    flex-direction:column; gap:16px; text-align:center; padding:36px;
+    position:relative; overflow:hidden;
   }
-  .btn:active { transform: translateY(1px); }
-  .btn-small { width:70px; height:70px; font-size:24px; background:rgba(0,0,0,0.4); }
-  .btn-mid { width:80px; height:80px; font-size:28px; background:rgba(0,0,0,0.4); }
-  .btn-large { width:90px; height:90px; font-size:28px; }
-  /* A (jump) green/blue gradient */
-  .btn-a { background: linear-gradient(180deg,#2be7b4,#1e9fe6); color:#041018; }
-  /* B (run/shoot) red */
-  .btn-b { background: linear-gradient(180deg,#ff6b6b,#c63737); color:#fff; }
-  /* Left/Right styling */
-  .btn-lr { background: rgba(0,0,0,0.4); color:#fff; width:80px; height:80px; font-size:30px; }
-  /* HUD and overlays */
-  .overlay {
-    position:fixed; left:0; top:0; width:100%; pointer-events:none; font-family:monospace;
-  }
-  .rotateHint {
-    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-    background:rgba(0,0,0,0.9); color:#fff; font-size:20px; z-index:9999; text-align:center;
-    padding:20px; box-sizing:border-box;
-  }
-  /* Game Over button */
-  .gameover-btn {
-    position: absolute; left:50%; top:60%; transform: translate(-50%,-50%);
-    pointer-events:auto; width:240px; height:80px; border-radius:12px;
-    background:linear-gradient(180deg,#ffb84d,#ff7a00); font-size:22px; color:#2b1b00;
-    display:flex; align-items:center; justify-content:center; box-shadow:0 10px 30px rgba(0,0,0,0.5);
-  }
-  /* pixel text style fallback */
-  .hudText { font-family: monospace; font-weight:700; color:#fff; text-shadow:2px 2px 0 rgba(0,0,0,0.6); pointer-events:none; }
+  .map-frame .pin{width:38px; height:38px; color:var(--ember);}
+
+  footer{ border-top:1px solid var(--line); padding:48px 0 34px; }
+  .foot-inner{display:flex; justify-content:space-between; flex-wrap:wrap; gap:24px; align-items:center;}
+  .foot-inner .brand{font-size:16px;}
+  .foot-links{display:flex; gap:26px; font-size:13px; color:var(--cream-dim);}
+  .foot-links a:hover{color:var(--wheat);}
+  .foot-note{margin-top:26px; font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--cream-faint);}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1);}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
 </style>
 </head>
 <body>
-<canvas id="gameCanvas"></canvas>
 
-<!-- Touch controls overlay (large, clear buttons) -->
-<div class="controls" id="controls">
-  <div class="leftGroup" style="z-index:50;">
-    <div id="btnLeft" class="btn btn-lr">◀</div>
-    <div id="btnRight" class="btn btn-lr">▶</div>
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 26 26" fill="none"><path d="M13 2.5 23 21.5H3L13 2.5Z" fill="none" stroke="#E7B84B" stroke-width="1.4" stroke-linejoin="round"/><circle cx="13" cy="12.5" r="1.1" fill="#E24C1F"/><circle cx="10" cy="16" r="1" fill="#E24C1F"/><circle cx="16" cy="16.5" r="1" fill="#E24C1F"/></svg>
+      Pedaço da Pizza
+    </div>
+    <nav class="links">
+      <a href="#cardapio">Cardápio</a>
+      <a href="#comodidades">Comodidades</a>
+      <a href="#avaliacoes">Avaliações</a>
+      <a href="#local">Localização</a>
+    </nav>
+    <a class="btn-nav" href="https://wa.me/556730264242" target="_blank" rel="noopener noreferrer">Pedir on-line</a>
+    <button class="burger" aria-label="Abrir menu"><span></span></button>
   </div>
-  <div class="rightGroup" style="z-index:50;">
-    <div id="btnA" class="btn btn-large btn-a">A</div>
-    <div id="btnB" class="btn btn-small btn-b">B</div>
+</header>
+
+<div class="strip">
+  <div class="strip-track">
+    <span class="strip-item">Forno a lenha</span>
+    <span class="strip-item"><b>Happy Hour</b> · Chopp Brahma</span>
+    <span class="strip-item">Mesas externas</span>
+    <span class="strip-item">Espaço privativo para eventos</span>
+    <span class="strip-item">Ótimos coquetéis</span>
+    <span class="strip-item">4,7 ★ · 6.989 avaliações</span>
+    <span class="strip-item">Forno a lenha</span>
+    <span class="strip-item"><b>Happy Hour</b> · Chopp Brahma</span>
+    <span class="strip-item">Mesas externas</span>
+    <span class="strip-item">Espaço privativo para eventos</span>
+    <span class="strip-item">Ótimos coquetéis</span>
+    <span class="strip-item">4,7 ★ · 6.989 avaliações</span>
   </div>
 </div>
 
-<!-- HUD overlay for text (we draw HUD on canvas, but keep area for Game Over button) -->
-<div id="overlays" class="overlay"></div>
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="status-pill"><span class="pulse"></span>Aberto agora · fecha às 23h30</div>
+      <h1 class="title">Pizza de forno<span class="line2">a lenha, sob as estrelas.</span></h1>
+      <p class="subtitle">Mesa externa, espaço privativo para eventos e o clássico Happy Hour com Chopp Brahma, no coração da Vila Vilas Boas, Campo Grande.</p>
 
-<!-- Rotate hint -->
-<div id="rotateHint" class="rotateHint" style="display:none;">
-  Rode seu aparelho para o modo paisagem (landscape) para jogar.
-</div>
+      <div class="hero-meta">
+        <div class="hm-item"><div class="k">Avaliação</div><div class="v">4,7 / 5</div></div>
+        <div class="hm-item"><div class="k">Faixa de preço</div><div class="v">R$ 40–120</div></div>
+        <div class="hm-item"><div class="k">Telefone</div><div class="v">(67) 3026-4242</div></div>
+      </div>
 
-<script>
-/*
-  Super Mario - Single-file HTML Mobile Canvas Game
-  - Render via Canvas 2D
-  - Touch controls with multitouch
-  - Physics with AABB separation
-  - Simplified but feature-rich implementation per user's spec
-  - Author: ChatGPT (engineer-style compact single-file)
-*/
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://wa.me/556730264242" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.4A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8.9-.2.2-.3.2-.5.1a6.7 6.7 0 0 1-2-1.2 7.4 7.4 0 0 1-1.4-1.7c-.1-.2 0-.4.1-.5l.4-.4c.1-.1.2-.2.2-.4a.4.4 0 0 0 0-.4c-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.1c0 1.3.9 2.5 1 2.7.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.6.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2 0-.1-.2-.2-.4-.3Z"/></svg>
+          Pedir on-line
+        </a>
+        <a class="btn btn-ghost" href="tel:+556730264242">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h3l2 5-2.5 1.5a11 11 0 0 0 5 5L15 12l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2Z"/></svg>
+          Ligar agora
+        </a>
+        <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=Av.+Bom+Pastor%2C+461+-+Vila+Vilas+Boas%2C+Campo+Grande+-+MS%2C+79051-220" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg>
+          Ver rotas
+        </a>
+      </div>
+    </div>
 
-/* ---------------------------
-   CONFIG / CONSTANTS
-   --------------------------- */
-const TILE = 32; // base tile size (pixels) - we'll scale drawing to display
-const GRAVITY = 0.6; // per spec
-const FPS = 60;
-const MS_PER_FRAME = 1000 / FPS;
-const MAX_JUMP_HOLD = 14; // frames jump can be held to increase height
-
-/* ---------------------------
-   CANVAS & RESIZE
-   --------------------------- */
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-let DPR = Math.max(1, window.devicePixelRatio || 1);
-
-// Resize to fill window and enforce landscape orientation; show rotate hint if portrait
-const rotateHint = document.getElementById('rotateHint');
-function resize() {
-  // use innerWidth/innerHeight as requested
-  let w = window.innerWidth;
-  let h = window.innerHeight;
-  // If portrait, show hint overlay but still size canvas
-  if (h > w) {
-    rotateHint.style.display = 'flex';
-  } else {
-    rotateHint.style.display = 'none';
-  }
-  canvas.width = Math.floor(w * DPR);
-  canvas.height = Math.floor(h * DPR);
-  canvas.style.width = w + 'px';
-  canvas.style.height = h + 'px';
-  // pixelated look
-  ctx.imageSmoothingEnabled = false;
-}
-window.addEventListener('resize', () => { DPR = Math.max(1, window.devicePixelRatio || 1); resize(); });
-resize();
-
-/* ---------------------------
-   AUDIO (WebAudio simple synths)
-   --------------------------- */
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-function ensureAudio() {
-  if (!audioCtx) {
-    audioCtx = new AudioCtx();
-  }
-}
-function beep(type = 'sine', freq = 440, time = 0.08, vol = 0.08) {
-  ensureAudio();
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type;
-  o.frequency.value = freq;
-  g.gain.value = vol;
-  o.connect(g);
-  g.connect(audioCtx.destination);
-  o.start();
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + time);
-  o.stop(audioCtx.currentTime + time + 0.02);
-}
-// Defined sound wrappers per spec
-function sfxJump(){ beep('sine', 880, 0.09, 0.09); }
-function sfxCoin(){ beep('square', 1200, 0.12, 0.09); }
-function sfxPowerup(){ beep('sawtooth', 440, 0.3, 0.12); }
-function sfxDeath(){ beep('sine', 120, 0.6, 0.18); }
-function sfxBlock(){ beep('square', 520, 0.12, 0.08); }
-
-/* ---------------------------
-   INPUT (Touch multi-touch)
-   --------------------------- */
-const input = {
-  left:false, right:false, jump:false, run:false
-};
-const touchMap = new Map(); // track touch identifiers per button
-
-// Hook up DOM buttons to touch events with multi-touch handling
-function bindButton(id, action) {
-  const el = document.getElementById(id);
-  // Prevent the default behavior to avoid scrolling
-  ['touchstart','touchmove','touchend','touchcancel'].forEach(ev=>{
-    el.addEventListener(ev, e=>e.preventDefault(), {passive:false});
-  });
-  el.addEventListener('touchstart', (e)=>{
-    for (let t of e.changedTouches) {
-      touchMap.set(t.identifier, action);
-      updateInputFromTouches();
-    }
-  }, {passive:false});
-  el.addEventListener('touchend', (e)=>{
-    for (let t of e.changedTouches) {
-      touchMap.delete(t.identifier);
-      updateInputFromTouches();
-    }
-  }, {passive:false});
-  el.addEventListener('touchcancel', (e)=>{
-    for (let t of e.changedTouches) {
-      touchMap.delete(t.identifier);
-      updateInputFromTouches();
-    }
-  }, {passive:false});
-  // Also handle mouse for desktop test convenience (not primary)
-  el.addEventListener('mousedown', (e)=>{ touchMap.set('mouse-'+id, action); updateInputFromTouches(); e.preventDefault(); });
-  window.addEventListener('mouseup', (e)=>{ touchMap.delete('mouse-'+id); updateInputFromTouches(); });
-}
-bindButton('btnLeft','left');
-bindButton('btnRight','right');
-bindButton('btnA','jump');
-bindButton('btnB','run');
-
-// Update global input flags based on active touches
-function updateInputFromTouches() {
-  input.left = input.right = input.jump = input.run = false;
-  for (const action of touchMap.values()) {
-    if (action === 'left') input.left = true;
-    if (action === 'right') input.right = true;
-    if (action === 'jump') input.jump = true;
-    if (action === 'run') input.run = true;
-  }
-}
-
-/* ---------------------------
-   UTILS
-   --------------------------- */
-function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-function rectsOverlap(a,b){
-  return !(a.x + a.w <= b.x || a.x >= b.x + b.w || a.y + a.h <= b.y || a.y >= b.y + b.h);
-}
-
-/* ---------------------------
-   GAME ENTITIES & MAP
-   --------------------------- */
-
-// Basic tile map (2D array). 0=empty,1=ground,2=question,3=brick,4=coin,5=pipe-top,6=pipe-body,7=flagpole
-// We'll generate a level procedurally with some gaps, pipes, blocks.
-class TileMap {
-  constructor(cols, rows) {
-    this.cols = cols;
-    this.rows = rows;
-    this.tiles = Array.from({length: rows}, ()=> new Array(cols).fill(0));
-    this.tileSize = TILE;
-    this.init();
-  }
-  init() {
-    // fill sky
-    for (let r=0;r<this.rows;r++) for (let c=0;c<this.cols;c++) this.tiles[r][c]=0;
-    const groundRow = this.rows-2;
-    // ground continuous with some holes
-    for (let c=0;c<this.cols;c++){
-      if (c>8 && Math.random()<0.05) { // hole: leave empty next 2-3 tiles
-        const holeSize = 2 + Math.floor(Math.random()*2);
-        for (let h=0; h<holeSize && c<this.cols; h++){ this.tiles[groundRow][c]=0; c++; }
-        c--;
-        continue;
-      }
-      this.tiles[groundRow][c] = 1; // ground tile
-      // make a few upper blocks
-      if (Math.random() < 0.09 && c>4 && c< this.cols-10) {
-        this.tiles[groundRow-3][c] = Math.random() < 0.6 ? 2 : 3; // question or brick
-      }
-      // pipes
-      if (Math.random() < 0.03 && c>6) {
-        const height = 2 + Math.floor(Math.random()*2);
-        this.tiles[groundRow-height][c] = 5; // pipe top
-        for (let hh=1; hh<height; hh++) this.tiles[groundRow-height+hh][c] = 6;
-        c += 2; // space after pipe
-      }
-      // flagpole near end
-      if (c === this.cols - 12) {
-        this.tiles[groundRow-4][c] = 7;
-      }
-    }
-    // Place some coins floating in a pattern
-    for (let c=10;c<this.cols-6;c+=10) {
-      if (Math.random()<0.7) {
-        this.tiles[groundRow-4][c] = 4;
-      }
-    }
-    // make sure starting area safe
-    for (let c=0;c<12;c++) {
-      for (let r=0;r<this.rows;r++) {
-        if (r>=groundRow) this.tiles[r][c] = (r===groundRow?1:0);
-        if (c===6 && r>=groundRow-1) { this.tiles[r][c]=1; } // ensure a small platform
-      }
-    }
-    // ensure at least one question block near start that gives mushroom
-    this.firstSpecialGiven = false;
-    for (let c=8;c<16;c++){
-      if (this.tiles[groundRow-3][c] === 2) { this.specialPos = {r:groundRow-3, c}; break; }
-    }
-  }
-  tileAt(col,row){
-    if (row<0 || row>=this.rows || col<0 || col>=this.cols) return 0;
-    return this.tiles[row][col];
-  }
-  setTile(col,row, val){
-    if (row<0 || row>=this.rows || col<0 || col>=this.cols) return;
-    this.tiles[row][col] = val;
-  }
-}
-
-/* ---------------------------
-   PARTICLES
-   --------------------------- */
-class Particle {
-  constructor(x,y,size, color, vx, vy, life) {
-    this.x=x; this.y=y; this.w=size; this.h=size;
-    this.vx=vx; this.vy=vy; this.color=color; this.life=life; this.maxLife=life;
-  }
-  update(dt) {
-    this.vy += GRAVITY * 0.18;
-    this.x += this.vx * dt;
-    this.y += this.vy * dt;
-    this.life -= dt;
-  }
-  draw(cx, camera) {
-    const px = Math.round((this.x - camera.x)*camera.scale);
-    const py = Math.round((this.y - camera.y)*camera.scale);
-    cx.globalAlpha = clamp(this.life/this.maxLife, 0,1);
-    cx.fillStyle = this.color;
-    cx.fillRect(px, py, Math.max(1, Math.round(this.w*camera.scale)), Math.max(1, Math.round(this.h*camera.scale)));
-    cx.globalAlpha = 1;
-  }
-}
-
-/* ---------------------------
-   ENEMIES
-   --------------------------- */
-class Enemy {
-  constructor(x,y) {
-    this.x=x; this.y=y; this.w=28; this.h=28;
-    this.vx = -0.5; this.vy=0; this.alive=true; this.onGround=false;
-    this.type='goomba';
-    this.flip=false; // used for drawing
-  }
-  update(dt, map, player) {
-    if (!this.alive) return;
-    // simple gravity
-    this.vy += GRAVITY * 0.9;
-    // patrol
-    this.x += this.vx * dt;
-    // collisions with map
-    // Horizontal collision: if tile ahead is solid at feet, continue; else reverse.
-    const aheadX = this.vx < 0 ? this.x - 8 : this.x + this.w + 8;
-    const footY = this.y + this.h - 4;
-    const col = Math.floor(aheadX / TILE);
-    const row = Math.floor(footY / TILE);
-    if (map.tileAt(col,row) === 0) {
-      this.vx *= -1;
-    }
-    // vertical
-    this.y += this.vy * dt;
-    // ground collision (naive)
-    const leftCol = Math.floor(this.x / TILE);
-    const rightCol = Math.floor((this.x + this.w -1)/TILE);
-    const belowRow = Math.floor((this.y + this.h) / TILE);
-    if (map.tileAt(leftCol, belowRow) || map.tileAt(rightCol, belowRow)) {
-      // place on top
-      this.y = belowRow * TILE - this.h - 0.01;
-      this.vy = 0;
-      this.onGround = true;
-    } else this.onGround = false;
-  }
-  draw(cx, camera) {
-    if (!this.alive) return;
-    const sx = Math.round((this.x - camera.x)*camera.scale);
-    const sy = Math.round((this.y - camera.y)*camera.scale);
-    const s = Math.round(this.w*camera.scale);
-    // simple goomba look: brown dome + eyes
-    cx.save();
-    cx.translate(sx, sy);
-    // body
-    cx.fillStyle = "#A65A2A";
-    cx.fillRect(0, Math.round(s*0.15), s, Math.round(s*0.7));
-    // feet
-    cx.fillStyle="#422210";
-    cx.fillRect(0, Math.round(s*0.8), Math.round(s*0.45), Math.round(s*0.2));
-    cx.fillRect(Math.round(s*0.55), Math.round(s*0.8), Math.round(s*0.45), Math.round(s*0.2));
-    // eyes
-    cx.fillStyle="#fff";
-    cx.fillRect(Math.round(s*0.28), Math.round(s*0.28), Math.max(2,Math.round(s*0.12)), Math.max(2,Math.round(s*0.12)));
-    cx.fillRect(Math.round(s*0.58), Math.round(s*0.28), Math.max(2,Math.round(s*0.12)), Math.max(2,Math.round(s*0.12)));
-    cx.fillStyle="#000";
-    cx.fillRect(Math.round(s*0.3), Math.round(s*0.3), Math.max(1,Math.round(s*0.05)), Math.max(1,Math.round(s*0.05)));
-    cx.fillRect(Math.round(s*0.6), Math.round(s*0.3), Math.max(1,Math.round(s*0.05)), Math.max(1,Math.round(s*0.05)));
-    cx.restore();
-  }
-}
-
-/* ---------------------------
-   PLAYER (Mario)
-   --------------------------- */
-class Player {
-  constructor(x,y) {
-    this.x = x; this.y = y;
-    this.w = 28; this.h = 32;
-    this.vx = 0; this.vy = 0;
-    this.onGround = false;
-    this.facing = 1; // 1 right, -1 left
-    this.running = false;
-    this.big = false; // small/big Mario
-    this.canShoot = false;
-    this.lives = 3;
-    this.score = 0;
-    this.coins = 0;
-    this.world = '1-1';
-    this.time = 400;
-    this.jumpHold = 0;
-    this.dead = false;
-    this.respawnTimer = 0;
-    this.animFrame = 0;
-    this.animTimer = 0;
-  }
-  get bounds(){ return {x:this.x, y:this.y, w:this.w, h:this.h}; }
-  update(dt, map, input, enemies, particles) {
-    if (this.dead) {
-      this.vy += GRAVITY;
-      this.y += this.vy * dt;
-      return;
-    }
-    // Horizontal movement: acceleration + friction
-    const accel = input.run ? 0.46 : 0.28;
-    const maxSpeed = input.run ? 6.0 : 3.8;
-    if (input.left) {
-      this.vx -= accel;
-      this.facing = -1;
-    } else if (input.right) {
-      this.vx += accel;
-      this.facing = 1;
-    } else {
-      // apply friction
-      this.vx *= 0.82;
-      if (Math.abs(this.vx) < 0.05) this.vx = 0;
-    }
-    this.vx = clamp(this.vx, -maxSpeed, maxSpeed);
-    // Jump: variable jump height while hold
-    if (input.jump) {
-      if (this.onGround && this.jumpHold === 0) {
-        // start jump
-        this.vy = -10.8; // initial impulse
-        this.jumpHold = 1;
-        this.onGround = false;
-        sfxJump();
-      } else if (this.jumpHold >0 && this.jumpHold < MAX_JUMP_HOLD) {
-        // keep applying small upward while held
-        this.vy -= 0.42;
-        this.jumpHold++;
-      }
-    } else {
-      this.jumpHold = 0;
-    }
-
-    // Apply gravity
-    this.vy += GRAVITY;
-    // Apply velocity and collisions (AABB separate axis)
-    // Horizontal move
-    this.x += this.vx * dt;
-    // collide with tiles horizontally
-    this.handleCollisions(map, 'x', particles);
-    // Vertical move
-    this.y += this.vy * dt;
-    // collide vertical
-    this.handleCollisions(map, 'y', particles);
-
-    // Enemy collisions
-    for (const e of enemies) {
-      if (!e.alive) continue;
-      const pbox = {x:this.x, y:this.y, w:this.w, h:this.h};
-      const ebox = {x:e.x, y:e.y, w:e.w, h:e.h};
-      if (rectsOverlap(pbox, ebox)) {
-        // if hitting from above
-        if (this.vy > 0 && (this.y + this.h - e.y) < 18) {
-          // stomp
-          e.alive = false;
-          this.vy = -8;
-          this.score += 100;
-          sfxCoin();
-          // small particles
-          for (let i=0;i<6;i++){
-            particles.push(new Particle(e.x + e.w/2, e.y + e.h/2, 4, '#FFD700', (Math.random()-0.5)*3, -3 - Math.random()*2, 40));
-          }
-        } else {
-          // side hit -> die (unless in invulnerable state; not implemented)
-          this.die();
-        }
-      }
-    }
-
-    // animation timer
-    this.animTimer++;
-    if (Math.abs(this.vx) > 0.6 && this.onGround) {
-      if (this.animTimer % 6 === 0) this.animFrame = (this.animFrame + 1) % 4;
-    } else {
-      this.animFrame = 0;
-      this.animTimer = 0;
-    }
-
-    // world time decrement
-    if (Math.floor(performance.now()/1000) % 1 === 0) {
-      // handled in game loop for consistency
-    }
-  }
-
-  handleCollisions(map, axis, particles) {
-    if (axis === 'x') {
-      const left = Math.floor(this.x / TILE);
-      const right = Math.floor((this.x + this.w - 1) / TILE);
-      const top = Math.floor(this.y / TILE);
-      const bottom = Math.floor((this.y + this.h - 1) / TILE);
-      // check multiple tiles overlapped horizontally
-      for (let r = top; r <= bottom; r++) {
-        for (let c = left; c <= right; c++) {
-          const t = map.tileAt(c,r);
-          if (!t) continue;
-          if (t === 5 || t === 6 || t === 1) { // solid
-            if (this.vx > 0) {
-              this.x = c * TILE - this.w - 0.01;
-            } else if (this.vx < 0) {
-              this.x = (c+1) * TILE + 0.01;
-            }
-            this.vx = 0;
-          }
-        }
-      }
-    } else if (axis === 'y') {
-      const left = Math.floor(this.x / TILE);
-      const right = Math.floor((this.x + this.w -1) / TILE);
-      const top = Math.floor(this.y / TILE);
-      const bottom = Math.floor((this.y + this.h -1) / TILE);
-      this.onGround = false;
-      for (let c = left; c <= right; c++) {
-        for (let r = top; r <= bottom; r++) {
-          const t = map.tileAt(c,r);
-          if (!t) continue;
-          if (t === 1 || t === 5 || t === 6) { // solid ground/pipe
-            if (this.vy > 0) {
-              // landing on top
-              this.y = r * TILE - this.h - 0.01;
-              this.vy = 0;
-              this.onGround = true;
-            } else if (this.vy < 0) {
-              // hitting from below
-              this.y = (r+1) * TILE + 0.01;
-              this.vy = 0;
-              // if it's a block that can be hit, trigger block behavior
-              if (t === 2 || t === 3) {
-                // bump animation: push block up and back down
-                this.bumpBlock(c,r,map,particles);
-              }
-            }
-          } else if (t === 2) { // question (floating) - should be triggered only on bump
-            // handled above
-          } else if (t === 4) { // coin tile - collect if touch
-            map.setTile(c,r,0);
-            this.coins++;
-            this.score += 200;
-            sfxCoin();
-            // coin particles (stars)
-            particles.push(new Particle(c*TILE + TILE/2, r*TILE + TILE/2, 6, '#FFD700', 0, -2.6, 50));
-            // stars rising
-            for (let i=0;i<6;i++){
-              particles.push(new Particle(c*TILE + TILE/2, r*TILE + TILE/2, 3, '#FFFF88', (Math.random()-0.5)*1.2, -2 - Math.random()*1.4, 40));
-            }
-          } else if (t === 7) { // flagpole (finish)
-            // do nothing here; flag detection handled in Game update by positi
+    <div class="gauge-card reveal">
+      <div class="gauge-top">
+        <span class="label">Termômetro do salão</span>
+      </div>
+      <div class="wheel-wrap">
+        <svg width="168" height="168" viewBox="0 0 168 168">
+          <defs>
+            <linearGradient id="slice-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#E7B84B"/>
+              <stop offset="100%" stop-color="#E24C1F"/>
+            </linearGradient>
+          </defs>
+          <g transform="translate(84,84)">
+            <!-- 8 slices, 3 filled to representar "um pouco movimentado" -->
+            <g id="slices"></g>
+            <circle r="30" fill="#180F0A" stroke="rgba(244,235,219,0.15)" stroke-width="1"/>
+          </g>
+          <text x="84" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#8E8070" letter-spacing="1">AGORA</text>
+          <text x="84" y="94" text-anchor="middle" font-family="Fraunces, serif" font-size="13" font-weight="600" fill="#F4EBDB">3/8</text>
+        </svg>
+      </div>
+      <div class="wheel-center-label">Um pouco movimentado</div
