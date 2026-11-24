@@ -1,1 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Localização</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; }
+        header { background: #2c3e50; color: white; padding: 15px; text-align: center; }
+        header h1 { margin: 0; font-size: 1.5rem; }
+        header p { margin: 5px 0 0 0; font-size: 0.9rem; color: #bdc3c7; }
+        #map { height: 45vh; width: 100%; z-index: 1; }
+        .container { padding: 15px; max-width: 800px; margin: 0 auto; }
+        .stats { display: flex; justify-content: space-around; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 1.8rem; font-weight: bold; color: #2980b9; }
+        .stat-label { font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; }
+        h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #2980b9; padding-bottom: 5px; }
+        .list-item { background: white; padding: 12px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #27ae60; }
+        .user-name { font-weight: bold; font-size: 1.1rem; color: #2c3e50; }
+        .user-meta { font-size: 0.85rem; color: #7f8c8d; margin-top: 4px; }
+        .btn-small { display: inline-block; padding: 5px 10px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.8rem; margin-right: 5px; margin-top: 8px; }
+        .btn-small:hover { background: #2980b9; }
+        #status { text-align: center; padding: 10px; font-size: 0.9rem; color: #7f8c8d; }
+    </style>
+</head>
+<body>
 
+<header>
+    <h1>📍 Painel de Monitoramento</h1>
+    <p>Atualização automática a cada 10 segundos</p>
+</header>
+
+<div id="map"></div>
+
+<div class="container">
+    <div class="stats">
+        <div class="stat-item">
+            <div class="stat-number" id="totalViews">0</div>
+            <div class="stat-label">Acessos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="lastUpdate">--:--</div>
+            <div class="stat-label">Último Atualizado</div>
+        </div>
+    </div>
+
+    <h3>Localizações Recentes</h3>
+    <div id="locationList">
+        <p style="text-align:center; color:#7f8c8d;">Carregando dados...</p>
+    </div>
+    <div id="status">Conectado ao Webhook</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const WEBHOOK_URL = "https://webhook.site/f48384c1-a975-443b-802f-d8fe26eda6a0";
+
+    const map = L.map('map').setView([-15.7801, -47.9292], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let markers = [];
+
+    async function fetchLocations() {
+        try {
+            const response = await fetch(WEBHOOK_URL + "/requests?count=50&order=desc");
+            if (!response.ok) throw new Error("Falha na conexão");
+            const data = await response.json();
+            updateDashboard(data.requests || []);
+        } catch (error) {
+            console.error("Erro ao buscar dados:", error);
+            document.getElementById('status').innerText = "⚠️ Erro de conexão. Tentando novamente...";
+        }
+    }
+
+    function updateDashboard(requests) {
+        const listDiv = document.getElementById('locationList');
+        const totalViews = document.getElementById('totalViews');
+        const lastUpdate = document.getElementById('lastUpdate');
+
+        const validLocations = requests.filter(req => {
+            const body = req.body || {};
+            return body.lat && body.lon;
+        });
+
+        totalViews.innerText = validLocations.length;
+        
+        if (validLocations.length === 0) {
+            listDiv.innerHTML = "<p style='text-align:center; color:#7f8c8d;'>Nenhuma localização recebida ainda.</p>";
+            return;
+        }
+
+        let html = "";
+        validLocations.forEach((req, index) => {
+            const body = req.body;
+            const lat = parseFloat(body.lat);
+            const lon = parseFloat(body.lon);
+            const name = body.name || "Anônimo";
+            const time = new Date(req.created_at).toLocaleTimeString('pt-BR');
+            const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+
+            html += `
+                <div class="list-item">
+                    <div class="user-name">${index + 1}. ${name}</div>
+                    <div class="user-meta">
+                        🕒 ${time} | 📏 Precisão: ${body.accuracy || 'N/D'}<br>
+                        🌍 Lat: ${lat}, Lon: ${lon}
+                    </div>
+                    <a href="${mapsLink}" target="_blank" class="btn-small">📍 Ver no Google Maps</a>
+                </div>
+            `;
+
+            addMarkerToMap(lat, lon, name, time);
+        });
+
+        listDiv.innerHTML = html;
+        lastUpdate.innerText = new Date().toLocaleTimeString('pt-BR');
+        document.getElementById('status').innerText = "✅ Atualizado: " + new Date().toLocaleTimeString('pt-BR');
+    }
+
+    function addMarkerToMap(lat, lon, name, time) {
+        const existingMarker = markers.find(m => m.getLatLng().lat === lat && m.getLatLng().lng === lon);
+        
+        if (!existingMarker) {
+            const marker = L.marker([lat, lon]).addTo(map);
+            marker.bindPopup(`<b>${name}</b><br>${time}<br><a href='https://www.google.com/maps?q=${lat},${lon}' target='_blank'>Abrir no Maps</a>`);
+            markers.push(marker);
+            
+            if (markers.length === 1) {
+                map.setView([lat, lon], 15);
+            }
+        }
+    }
+
+    fetchLocations();
+    setInterval(fetchLocations, 10000);
+</script>
+
+</body>
+</html>
